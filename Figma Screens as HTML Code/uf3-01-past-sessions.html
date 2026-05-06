@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1280">
+<title>RhythmXR — Past Sessions</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Encode+Sans+Semi+Expanded:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{width:1280px;min-height:900px;background:#0d0d1a;font-family:'Encode Sans Semi Expanded',sans-serif;color:#fff;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 50% 50% at 50% 30%,rgba(93,46,140,0.12) 0%,transparent 60%);pointer-events:none;}
+.top-nav{background:#5D2E8C;display:flex;width:100%;position:relative;z-index:10;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:11px 4px 10px;gap:4px;cursor:pointer;border-right:1px solid rgba(255,255,255,0.1);}
+.nav-item:last-child{border-right:none;}
+.nav-item svg{width:16px;height:16px;fill:rgba(255,255,255,0.8);}
+.nav-label{font-size:9px;letter-spacing:1px;font-weight:600;color:rgba(255,255,255,0.8);}
+.nav-item.active svg{fill:#CCFF66;}
+.nav-item.active .nav-label{color:#CCFF66;}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:820px;position:relative;z-index:1;}
+.sidebar{padding:32px 24px;border-right:1px solid rgba(255,255,255,0.07);}
+.sidebar-title{font-family:'Fredoka',sans-serif;font-size:24px;font-weight:600;margin-bottom:6px;}
+.sidebar-sub{font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:24px;}
+.filter-section{margin-bottom:20px;}
+.filter-label{font-size:8px;letter-spacing:1.5px;color:rgba(255,255,255,0.35);margin-bottom:10px;}
+.filter-chip{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:7px;padding:8px 12px;margin-bottom:6px;cursor:pointer;font-size:11px;color:rgba(255,255,255,0.6);}
+.filter-chip.active{border-color:rgba(93,46,140,0.6);background:rgba(93,46,140,0.12);color:#fff;}
+.filter-count{background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 7px;font-size:9px;}
+.stat-mini-row{display:flex;flex-direction:column;gap:8px;margin-top:20px;}
+.stat-mini{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px;}
+.sm-label{font-size:8px;letter-spacing:1px;color:rgba(255,255,255,0.35);margin-bottom:4px;}
+.sm-val{font-family:'Fredoka',sans-serif;font-size:18px;font-weight:600;color:#0B7189;}
+.main-area{padding:32px 40px;}
+.timeline-header{font-size:9px;letter-spacing:2px;color:rgba(255,255,255,0.3);margin-bottom:16px;font-weight:600;}
+.session-entry{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;overflow:hidden;display:grid;grid-template-columns:240px 1fr;margin-bottom:14px;}
+.session-thumb{background:rgba(93,46,140,0.2);border-right:1px solid rgba(255,255,255,0.08);position:relative;min-height:140px;display:flex;align-items:center;justify-content:center;}
+.thumb-pattern{position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(93,46,140,0.08) 10px,rgba(93,46,140,0.08) 11px);}
+.thumb-icon{position:relative;z-index:1;width:44px;height:44px;border-radius:50%;background:rgba(93,46,140,0.5);display:flex;align-items:center;justify-content:center;}
+.thumb-icon svg{width:22px;height:22px;fill:#c9a3f0;}
+.thumb-badge{position:absolute;top:10px;left:10px;background:rgba(0,0,0,0.5);border-radius:4px;padding:2px 7px;font-size:8px;letter-spacing:1px;color:rgba(255,255,255,0.7);}
+.session-body{padding:20px 24px;}
+.session-meta{font-size:9px;color:rgba(255,255,255,0.35);letter-spacing:0.5px;margin-bottom:8px;}
+.session-title{font-family:'Fredoka',sans-serif;font-size:20px;font-weight:600;margin-bottom:10px;}
+.session-chips{display:flex;gap:8px;margin-bottom:14px;}
+.chip-sm{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:5px;padding:4px 8px;font-size:9px;color:rgba(255,255,255,0.5);}
+.chip-sm svg{width:9px;height:9px;fill:rgba(255,255,255,0.4);}
+.chip-medal{background:rgba(204,255,102,0.1);border-color:rgba(204,255,102,0.25);color:#CCFF66;}
+.chip-medal svg{fill:#CCFF66;}
+.session-actions{display:flex;gap:8px;}
+.btn-replay{background:#5D2E8C;border:none;border-radius:6px;padding:8px 16px;color:#fff;font-family:'Encode Sans Semi Expanded',sans-serif;font-size:9px;letter-spacing:1px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;}
+.btn-replay svg{width:11px;height:11px;fill:#fff;}
+.period-divider{display:flex;align-items:center;gap:12px;margin:20px 0 14px;}
+.period-dot{width:8px;height:8px;border-radius:50%;background:#5D2E8C;}
+.period-text{font-size:9px;letter-spacing:2px;color:rgba(255,255,255,0.35);font-weight:600;}
+.period-line{flex:1;height:1px;background:rgba(255,255,255,0.08);}
+</style>
+</head>
+<body>
+<nav class="top-nav">
+  <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M3 12L12 3l9 9v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg><span class="nav-label">HOME</span></div>
+  <div class="nav-item active"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20M6 2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2z"/></svg><span class="nav-label">LIBRARY</span></div>
+  <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><span class="nav-label">LEARN</span></div>
+  <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M4 20h4V10H4zM10 20h4V4h-4zM16 20h4v-6h-4z"/></svg><span class="nav-label">STATS</span></div>
+  <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm-7 8a7 7 0 1114 0H5z"/></svg><span class="nav-label">PROFILE</span></div>
+</nav>
+<div class="layout">
+  <div class="sidebar">
+    <div class="sidebar-title">RhythmXR</div>
+    <div class="sidebar-sub">Practice History</div>
+    <div class="filter-section">
+      <div class="filter-label">FILTER BY</div>
+      <div class="filter-chip active">All Sessions <span class="filter-count">24</span></div>
+      <div class="filter-chip">With Tutor <span class="filter-count">16</span></div>
+      <div class="filter-chip">AI Self-Learn <span class="filter-count">8</span></div>
+    </div>
+    <div class="filter-section">
+      <div class="filter-label">TIME PERIOD</div>
+      <div class="filter-chip active">November 2023</div>
+      <div class="filter-chip">October 2023</div>
+      <div class="filter-chip">September 2023</div>
+    </div>
+    <div class="stat-mini-row">
+      <div class="stat-mini"><div class="sm-label">TOTAL SESSIONS</div><div class="sm-val">24</div></div>
+      <div class="stat-mini"><div class="sm-label">AVG ACCURACY</div><div class="sm-val">87%</div></div>
+      <div class="stat-mini"><div class="sm-label">MEDALS EARNED</div><div class="sm-val">12</div></div>
+    </div>
+  </div>
+  <div class="main-area">
+    <div class="timeline-header">NOVEMBER 2023</div>
+    <div class="session-entry">
+      <div class="session-thumb">
+        <div class="thumb-pattern"></div>
+        <div class="thumb-icon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+        <div class="thumb-badge">NOV 22</div>
+      </div>
+      <div class="session-body">
+        <div class="session-meta">NOV 22, 2023 · 42 MIN · SENSEI KAI</div>
+        <div class="session-title">Urban Flow Masterclass</div>
+        <div class="session-chips">
+          <div class="chip-sm"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>128 BPM</div>
+          <div class="chip-sm"><svg viewBox="0 0 24 24"><path d="M4 20h4V10H4zM10 20h4V4h-4zM16 20h4v-6h-4z"/></svg>75% COMPLETION</div>
+          <div class="chip-sm chip-medal"><svg viewBox="0 0 24 24"><path d="M12 15a7 7 0 100-14 7 7 0 000 14zM8.21 13.89L7 23l5-3 5 3-1.21-9.12"/></svg>SILVER MEDAL</div>
+        </div>
+        <div class="session-actions">
+          <button class="btn-replay"><svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"/></svg>RE-ENTER BUBBLE</button>
+        </div>
+      </div>
+    </div>
+    <div class="session-entry">
+      <div class="session-thumb">
+        <div class="thumb-pattern"></div>
+        <div class="thumb-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3"/></svg></div>
+        <div class="thumb-badge">NOV 19</div>
+      </div>
+      <div class="session-body">
+        <div class="session-meta">NOV 19, 2023 · 35 MIN · AI SELF-LEARN</div>
+        <div class="session-title">Glitch Hop v3</div>
+        <div class="session-chips">
+          <div class="chip-sm"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>140 BPM</div>
+          <div class="chip-sm chip-medal"><svg viewBox="0 0 24 24"><path d="M12 15a7 7 0 100-14 7 7 0 000 14zM8.21 13.89L7 23l5-3 5 3-1.21-9.12"/></svg>SILVER MEDAL</div>
+        </div>
+        <div class="session-actions">
+          <button class="btn-replay"><svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"/></svg>RE-ENTER BUBBLE</button>
+        </div>
+      </div>
+    </div>
+    <div class="period-divider">
+      <div class="period-dot"></div>
+      <div class="period-text">OCTOBER 2023</div>
+      <div class="period-line"></div>
+    </div>
+    <div class="session-entry">
+      <div class="session-thumb">
+        <div class="thumb-pattern"></div>
+        <div class="thumb-icon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+        <div class="thumb-badge">OCT 20</div>
+      </div>
+      <div class="session-body">
+        <div class="session-meta">OCT 20, 2023 · 28 MIN · SENSEI KAI</div>
+        <div class="session-title">Neo-Soul Swing</div>
+        <div class="session-chips">
+          <div class="chip-sm"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>110 BPM</div>
+          <div class="chip-sm"><svg viewBox="0 0 24 24"><path d="M4 20h4V10H4zM10 20h4V4h-4zM16 20h4v-6h-4z"/></svg>75% COMPLETION</div>
+        </div>
+        <div class="session-actions">
+          <button class="btn-replay"><svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"/></svg>RE-ENTER BUBBLE</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

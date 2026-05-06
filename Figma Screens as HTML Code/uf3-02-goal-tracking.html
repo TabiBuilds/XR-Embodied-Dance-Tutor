@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1280">
+<title>RhythmXR — Goal Tracking</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Encode+Sans+Semi+Expanded:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{width:1280px;min-height:900px;background:#0d0d1a;font-family:'Encode Sans Semi Expanded',sans-serif;color:#fff;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 55% 50% at 55% 35%,rgba(93,46,140,0.14) 0%,transparent 60%),radial-gradient(ellipse 35% 35% at 20% 70%,rgba(11,113,137,0.12) 0%,transparent 55%);pointer-events:none;}
+.top-nav{background:#5D2E8C;display:flex;width:100%;position:relative;z-index:10;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:11px 4px 10px;gap:4px;cursor:pointer;border-right:1px solid rgba(255,255,255,0.1);}
+.nav-item:last-child{border-right:none;}
+.nav-item svg{width:16px;height:16px;fill:rgba(255,255,255,0.8);}
+.nav-label{font-size:9px;letter-spacing:1px;font-weight:600;color:rgba(255,255,255,0.8);}
+.nav-item.active svg{fill:#CCFF66;}
+.nav-item.active .nav-label{color:#CCFF66;}
+.content{padding:40px 64px;position:relative;z-index:1;}
+.page-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:32px;}
+.page-title{font-family:'Fredoka',sans-serif;font-size:40px;font-weight:600;}
+.page-sub{font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px;}
+.header-right{display:flex;gap:8px;}
+.header-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:8px 16px;font-size:10px;color:rgba(255,255,255,0.6);cursor:pointer;letter-spacing:0.5px;}
+.goals-area{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:24px;}
+.goal-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:22px;}
+.goal-meta{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
+.goal-num{font-size:9px;letter-spacing:1.5px;color:rgba(255,255,255,0.35);font-weight:600;}
+.goal-status{font-size:9px;padding:3px 8px;border-radius:4px;font-weight:600;letter-spacing:0.5px;}
+.status-in-progress{background:rgba(11,113,137,0.2);color:#7fe0ef;border:1px solid rgba(11,113,137,0.35);}
+.status-on-track{background:rgba(204,255,102,0.12);color:#CCFF66;border:1px solid rgba(204,255,102,0.3);}
+.goal-title{font-family:'Fredoka',sans-serif;font-size:16px;font-weight:600;margin-bottom:16px;line-height:1.3;}
+.progress-wrap{margin-bottom:12px;}
+.progress-row{display:flex;justify-content:space-between;margin-bottom:6px;}
+.progress-label{font-size:9px;color:rgba(255,255,255,0.45);}
+.progress-val{font-family:'Fredoka',sans-serif;font-size:14px;font-weight:600;color:#0B7189;}
+.progress-track{height:5px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:3px;}
+.fill-teal{background:linear-gradient(90deg,#0B7189,#1bc1e8);}
+.fill-green{background:linear-gradient(90deg,#83ad00,#CCFF66);}
+.fill-purple{background:linear-gradient(90deg,#5D2E8C,#a577dd);}
+.goal-milestones{display:flex;gap:8px;margin-top:10px;}
+.milestone{width:8px;height:8px;border-radius:2px;}
+.milestone.done{background:#0B7189;}
+.milestone.done-green{background:#CCFF66;}
+.milestone.pending{background:rgba(255,255,255,0.15);}
+.bottom-area{display:grid;grid-template-columns:1fr 320px;gap:20px;}
+.chart-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:24px;}
+.chart-title{font-family:'Fredoka',sans-serif;font-size:18px;font-weight:600;margin-bottom:6px;}
+.chart-sub{font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:20px;}
+.chart-area{height:180px;display:flex;align-items:flex-end;gap:8px;padding-bottom:24px;position:relative;border-bottom:1px solid rgba(255,255,255,0.08);}
+.chart-bar-group{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.bar{width:100%;border-radius:4px 4px 0 0;}
+.bar-teal{background:rgba(11,113,137,0.7);}
+.bar-green{background:rgba(204,255,102,0.6);}
+.chart-x{font-size:8px;color:rgba(255,255,255,0.3);letter-spacing:0.5px;margin-top:4px;}
+.chart-legend{display:flex;gap:16px;margin-top:12px;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:10px;color:rgba(255,255,255,0.5);}
+.legend-dot{width:8px;height:8px;border-radius:2px;}
+.side-col{display:flex;flex-direction:column;gap:14px;}
+.donut-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:22px;text-align:center;}
+.donut-title{font-family:'Fredoka',sans-serif;font-size:16px;font-weight:600;margin-bottom:4px;}
+.donut-sub{font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:16px;}
+.donut-svg{margin:0 auto;display:block;}
+.donut-center{font-family:'Fredoka',sans-serif;font-size:22px;font-weight:600;color:#0B7189;}
+.milestones-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:22px;}
+.mc-title{font-family:'Fredoka',sans-serif;font-size:16px;font-weight:600;margin-bottom:14px;}
+.milestone-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);}
+.milestone-row:last-child{border-bottom:none;}
+.milestone-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.dot-done{background:#CCFF66;}
+.dot-pending{background:rgba(255,255,255,0.2);}
+.milestone-text{font-size:11px;color:rgba(255,255,255,0.65);}
+.milestone-date{font-size:9px;color:rgba(255,255,255,0.35);margin-left:auto;white-space:nowrap;}
+</style>
+</head>
+<body>
+<nav class="top-nav">
+  <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M3 12L12 3l9 9v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg><span class="nav-label">HOME</span></div>
+  <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20M6 2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2z"/></svg><span class="nav-label">LIBRARY</span></div>
+  <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><span class="nav-label">LEARN</span></div>
+  <div class="nav-item active"><svg viewBox="0 0 24 24"><path d="M4 20h4V10H4zM10 20h4V4h-4zM16 20h4v-6h-4z"/></svg><span class="nav-label">STATS</span></div>
+  <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm-7 8a7 7 0 1114 0H5z"/></svg><span class="nav-label">PROFILE</span></div>
+</nav>
+<div class="content">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Goal Progress</div>
+      <div class="page-sub">Your active training objectives — updated after every session</div>
+    </div>
+    <div class="header-right">
+      <div class="header-btn">NOVEMBER 2023</div>
+      <div class="header-btn">+ ADD GOAL</div>
+    </div>
+  </div>
+  <div class="goals-area">
+    <div class="goal-card">
+      <div class="goal-meta"><span class="goal-num">GOAL 01</span><span class="goal-status status-in-progress">IN PROGRESS</span></div>
+      <div class="goal-title">Master 95% accuracy in Urban Flow</div>
+      <div class="progress-wrap">
+        <div class="progress-row"><span class="progress-label">Current</span><span class="progress-val">87%</span></div>
+        <div class="progress-track"><div class="progress-fill fill-teal" style="width:87%;"></div></div>
+      </div>
+      <div class="goal-milestones">
+        <div class="milestone done"></div>
+        <div class="milestone done"></div>
+        <div class="milestone done"></div>
+        <div class="milestone pending"></div>
+        <div class="milestone pending"></div>
+      </div>
+    </div>
+    <div class="goal-card">
+      <div class="goal-meta"><span class="goal-num">GOAL 02</span><span class="goal-status status-in-progress">IN PROGRESS</span></div>
+      <div class="goal-title">Maintain 140 BPM for 15 minutes</div>
+      <div class="progress-wrap">
+        <div class="progress-row"><span class="progress-label">Best Run</span><span class="progress-val">11:40</span></div>
+        <div class="progress-track"><div class="progress-fill fill-purple" style="width:78%;"></div></div>
+      </div>
+      <div class="goal-milestones">
+        <div class="milestone done"></div>
+        <div class="milestone done"></div>
+        <div class="milestone pending"></div>
+        <div class="milestone pending"></div>
+        <div class="milestone pending"></div>
+      </div>
+    </div>
+    <div class="goal-card">
+      <div class="goal-meta"><span class="goal-num">GOAL 03</span><span class="goal-status status-on-track">ON TRACK</span></div>
+      <div class="goal-title">Reduce Axis Drift below 5%</div>
+      <div class="progress-wrap">
+        <div class="progress-row"><span class="progress-label">Current Drift</span><span class="progress-val" style="color:#CCFF66;">6.2%</span></div>
+        <div class="progress-track"><div class="progress-fill fill-green" style="width:60%;"></div></div>
+      </div>
+      <div class="goal-milestones">
+        <div class="milestone done-green"></div>
+        <div class="milestone done-green"></div>
+        <div class="milestone done-green"></div>
+        <div class="milestone pending"></div>
+        <div class="milestone pending"></div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-area">
+    <div class="chart-card">
+      <div class="chart-title">Performance Over Time</div>
+      <div class="chart-sub">Accuracy & Stability · Last 8 Sessions</div>
+      <div class="chart-area">
+        <div class="chart-bar-group"><div class="bar bar-teal" style="height:100px;"></div><div class="bar bar-green" style="height:80px;"></div><div class="chart-x">Oct 1</div></div>
+        <div class="chart-bar-group"><div class="bar bar-teal" style="height:110px;"></div><div class="bar bar-green" style="height:90px;"></div><div class="chart-x">Oct 8</div></div>
+        <div class="chart-bar-group"><div class="bar bar-teal" style="height:95px;"></div><div class="bar bar-green" style="height:100px;"></div><div class="chart-x">Oct 15</div></div>
+        <div class="chart-bar-group"><div class="bar bar-teal" style="height:120px;"></div><div class="bar bar-green" style="height:110px;"></div><div class="chart-x">Oct 22</div></div>
+        <div class="chart-bar-group"><div class="bar bar-teal" style="height:130px;"></div><div class="bar bar-green" style="height:120px;"></div><div class="chart-x">Nov 5</div></div>
+        <div class="chart-bar-group"><div class="bar bar-teal" style="height:125px;"></div><div class="bar bar-green" style="height:130px;"></div><div class="chart-x">Nov 12</div></div>
+        <div class="chart-bar-group"><div class="bar bar-teal" style="height:140px;"></div><div class="bar bar-green" style="height:145px;"></div><div class="chart-x">Nov 19</div></div>
+        <div class="chart-bar-group"><div class="bar bar-teal" style="height:148px;"></div><div class="bar bar-green" style="height:155px;"></div><div class="chart-x">Nov 22</div></div>
+      </div>
+      <div class="chart-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(11,113,137,0.7);"></div>Stability</div>
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(204,255,102,0.6);"></div>Accuracy</div>
+      </div>
+    </div>
+    <div class="side-col">
+      <div class="donut-card">
+        <div class="donut-title">Center Stability</div>
+        <div class="donut-sub">Axis & balance across all sessions</div>
+        <svg class="donut-svg" width="100" height="100" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="36" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="12"/>
+          <circle cx="50" cy="50" r="36" fill="none" stroke="#0B7189" stroke-width="12" stroke-dasharray="197 226" stroke-dashoffset="56" stroke-linecap="round"/>
+          <text x="50" y="55" text-anchor="middle" font-family="Fredoka,sans-serif" font-size="16" font-weight="600" fill="#0B7189">87%</text>
+        </svg>
+      </div>
+      <div class="milestones-card">
+        <div class="mc-title">Key Gains</div>
+        <div class="milestone-row"><div class="milestone-dot dot-done"></div><span class="milestone-text">First 100% sync session</span><span class="milestone-date">Nov 22</span></div>
+        <div class="milestone-row"><div class="milestone-dot dot-done"></div><span class="milestone-text">A+ accuracy achieved</span><span class="milestone-date">Nov 19</span></div>
+        <div class="milestone-row"><div class="milestone-dot dot-pending"></div><span class="milestone-text">140 BPM for 15 min</span><span class="milestone-date">Pending</span></div>
+        <div class="milestone-row"><div class="milestone-dot dot-pending"></div><span class="milestone-text">Axis drift &lt; 5%</span><span class="milestone-date">Pending</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1280">
+<title>RhythmXR — Session Replay</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Encode+Sans+Semi+Expanded:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{width:1280px;min-height:900px;background:#080c14;font-family:'Encode Sans Semi Expanded',sans-serif;color:#fff;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 50% 50% at 50% 45%,rgba(93,46,140,0.15) 0%,transparent 60%);pointer-events:none;}
+.top-nav{background:#5D2E8C;display:flex;width:100%;position:relative;z-index:10;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:11px 4px 10px;gap:4px;cursor:pointer;border-right:1px solid rgba(255,255,255,0.1);}
+.nav-item:last-child{border-right:none;}
+.nav-item svg{width:16px;height:16px;fill:rgba(255,255,255,0.8);}
+.nav-label{font-size:9px;letter-spacing:1px;font-weight:600;color:rgba(255,255,255,0.8);}
+.nav-item.active svg{fill:#CCFF66;}
+.nav-item.active .nav-label{color:#CCFF66;}
+.top-bar{background:rgba(0,0,0,0.3);border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:space-between;padding:10px 24px;position:relative;z-index:5;}
+.session-info{display:flex;align-items:center;gap:14px;}
+.session-tag{background:rgba(93,46,140,0.3);border:1px solid rgba(93,46,140,0.5);border-radius:5px;padding:4px 10px;font-size:9px;letter-spacing:1px;color:rgba(255,255,255,0.7);}
+.session-name{font-family:'Fredoka',sans-serif;font-size:16px;}
+.session-date{font-size:11px;color:rgba(255,255,255,0.4);}
+.top-actions{display:flex;gap:8px;}
+.action-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:7px 14px;font-size:10px;color:rgba(255,255,255,0.6);cursor:pointer;letter-spacing:0.5px;}
+.action-btn.primary{background:#5D2E8C;border-color:#5D2E8C;color:#fff;}
+.split-canvas{display:grid;grid-template-columns:1fr 1fr;min-height:640px;position:relative;z-index:1;}
+.split-pane{position:relative;display:flex;align-items:center;justify-content:center;border-right:1px solid rgba(255,255,255,0.08);}
+.split-pane:last-child{border-right:none;}
+.pane-label{position:absolute;top:16px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.5);border-radius:6px;padding:5px 14px;display:flex;align-items:center;gap:8px;white-space:nowrap;}
+.pane-dot{width:8px;height:8px;border-radius:50%;}
+.dot-mem{background:rgba(11,113,137,0.8);}
+.dot-ideal{background:rgba(204,255,102,0.8);}
+.pane-label-text{font-size:10px;letter-spacing:1px;color:rgba(255,255,255,0.7);font-weight:600;}
+.figure-wrap{position:relative;width:300px;height:480px;}
+.f-ring{position:absolute;border-radius:50%;border:1px solid;}
+.memory-ring{border-color:rgba(11,113,137,0.3);}
+.ideal-ring{border-color:rgba(204,255,102,0.2);}
+.dancer-shape{width:80px;height:200px;border-radius:40px 40px 20px 20px;position:absolute;top:50%;left:50%;transform:translate(-50%,-55%);}
+.dancer-memory{background:rgba(11,113,137,0.3);border:1px solid rgba(11,113,137,0.6);}
+.dancer-ideal{background:rgba(204,255,102,0.15);border:1px solid rgba(204,255,102,0.4);}
+.head-shape{width:26px;height:26px;border-radius:50%;position:absolute;top:-30px;left:50%;transform:translateX(-50%);}
+.head-memory{background:rgba(11,113,137,0.4);}
+.head-ideal{background:rgba(204,255,102,0.3);}
+.timeline-area{position:relative;z-index:5;background:rgba(0,0,0,0.5);border-top:1px solid rgba(255,255,255,0.08);padding:16px 24px;}
+.time-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.time-current{font-family:'Fredoka',sans-serif;font-size:14px;color:#CCFF66;width:50px;}
+.timeline-track{flex:1;height:4px;background:rgba(255,255,255,0.12);border-radius:2px;position:relative;cursor:pointer;}
+.timeline-fill{height:100%;background:linear-gradient(90deg,#5D2E8C,#0B7189);border-radius:2px;width:62%;}
+.timeline-head{position:absolute;top:50%;left:62%;transform:translate(-50%,-50%);width:12px;height:12px;border-radius:50%;background:#CCFF66;border:2px solid #fff;}
+.time-total{font-size:11px;color:rgba(255,255,255,0.4);width:50px;text-align:right;}
+.controls-row{display:flex;align-items:center;justify-content:space-between;}
+.playback-controls{display:flex;align-items:center;gap:12px;}
+.ctrl-btn{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.ctrl-btn svg{width:16px;height:16px;fill:rgba(255,255,255,0.7);}
+.ctrl-btn.play{width:44px;height:44px;background:#5D2E8C;border-color:#5D2E8C;}
+.ctrl-btn.play svg{fill:#fff;width:18px;height:18px;}
+.speed-chip{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:5px;padding:5px 10px;font-size:10px;color:rgba(255,255,255,0.6);}
+.segment-markers{display:flex;gap:8px;}
+.seg-marker{display:flex;align-items:center;gap:6px;font-size:9px;color:rgba(255,255,255,0.5);}
+.seg-dot{width:6px;height:6px;border-radius:50%;}
+.dot-teal{background:#0B7189;}
+.dot-warn{background:#f5a623;}
+.revise-section{display:flex;gap:10px;}
+.btn-revise{background:#5D2E8C;border:none;border-radius:7px;padding:10px 20px;color:#fff;font-family:'Encode Sans Semi Expanded',sans-serif;font-size:10px;letter-spacing:1px;font-weight:600;cursor:pointer;}
+.btn-export{background:transparent;border:1px solid rgba(255,255,255,0.2);border-radius:7px;padding:10px 16px;color:rgba(255,255,255,0.6);font-family:'Encode Sans Semi Expanded',sans-serif;font-size:10px;cursor:pointer;}
+.annotation-badge{position:absolute;background:rgba(245,166,35,0.8);border-radius:5px;padding:4px 8px;font-size:9px;color:#fff;white-space:nowrap;pointer-events:none;}
+</style>
+</head>
+<body>
+<nav class="top-nav">
+  <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M3 12L12 3l9 9v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg><span class="nav-label">HOME</span></div>
+  <div class="nav-item active"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20M6 2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2z"/></svg><span class="nav-label">LIBRARY</span></div>
+  <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><span class="nav-label">LEARN</span></div>
+  <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M4 20h4V10H4zM10 20h4V4h-4zM16 20h4v-6h-4z"/></svg><span class="nav-label">STATS</span></div>
+  <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm-7 8a7 7 0 1114 0H5z"/></svg><span class="nav-label">PROFILE</span></div>
+</nav>
+<div class="top-bar">
+  <div class="session-info">
+    <div class="session-tag">SESSION REPLAY</div>
+    <div><div class="session-name">Urban Flow Masterclass</div><div class="session-date">Nov 22, 2023 · Sensei Kai · 42 min</div></div>
+  </div>
+  <div class="top-actions">
+    <div class="action-btn">COMPARE MODE</div>
+    <div class="action-btn primary">REVISE</div>
+  </div>
+</div>
+<div class="split-canvas">
+  <div class="split-pane">
+    <div class="pane-label">
+      <div class="pane-dot dot-mem"></div>
+      <span class="pane-label-text">YOUR MEMORY</span>
+    </div>
+    <div class="figure-wrap">
+      <div class="f-ring memory-ring" style="width:280px;height:280px;top:50%;left:50%;transform:translate(-50%,-50%);position:absolute;"></div>
+      <div class="f-ring memory-ring" style="width:180px;height:180px;top:50%;left:50%;transform:translate(-50%,-50%);position:absolute;"></div>
+      <div class="dancer-shape dancer-memory" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-55%);">
+        <div class="head-shape head-memory"></div>
+      </div>
+      <div class="annotation-badge" style="top:25%;right:10px;">Shoulder +14°</div>
+    </div>
+  </div>
+  <div class="split-pane">
+    <div class="pane-label">
+      <div class="pane-dot dot-ideal"></div>
+      <span class="pane-label-text">IDEAL FORM</span>
+    </div>
+    <div class="figure-wrap">
+      <div class="f-ring ideal-ring" style="width:280px;height:280px;top:50%;left:50%;transform:translate(-50%,-50%);position:absolute;"></div>
+      <div class="f-ring ideal-ring" style="width:180px;height:180px;top:50%;left:50%;transform:translate(-50%,-50%);position:absolute;"></div>
+      <div class="dancer-shape dancer-ideal" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-55%);">
+        <div class="head-shape head-ideal"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="timeline-area">
+  <div class="time-row">
+    <span class="time-current">26:04</span>
+    <div class="timeline-track">
+      <div class="timeline-fill"></div>
+      <div class="timeline-head"></div>
+      <div style="position:absolute;top:-10px;left:30%;width:2px;height:24px;background:rgba(245,166,35,0.7);border-radius:1px;"></div>
+      <div style="position:absolute;top:-10px;left:55%;width:2px;height:24px;background:rgba(204,255,102,0.5);border-radius:1px;"></div>
+    </div>
+    <span class="time-total">42:15</span>
+  </div>
+  <div class="controls-row">
+    <div class="playback-controls">
+      <div class="ctrl-btn"><svg viewBox="0 0 24 24"><path d="M19 20L9 12l10-8v16zM5 19V5" stroke="rgba(255,255,255,0.7)" stroke-width="2" fill="none"/></svg></div>
+      <div class="ctrl-btn"><svg viewBox="0 0 24 24"><path d="M19 20L9 12l10-8v16z" stroke="rgba(255,255,255,0.7)" stroke-width="2" fill="none"/></svg></div>
+      <div class="ctrl-btn play"><svg viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4z" fill="#fff"/></svg></div>
+      <div class="ctrl-btn"><svg viewBox="0 0 24 24"><path d="M5 4l10 8-10 8V4z" stroke="rgba(255,255,255,0.7)" stroke-width="2" fill="none"/></svg></div>
+      <div class="ctrl-btn"><svg viewBox="0 0 24 24"><path d="M5 4l10 8-10 8V4zM19 5v14" stroke="rgba(255,255,255,0.7)" stroke-width="2" fill="none"/></svg></div>
+      <div class="speed-chip">1.0x SPEED</div>
+    </div>
+    <div class="segment-markers">
+      <div class="seg-marker"><div class="seg-dot dot-warn"></div>Shoulder Correction</div>
+      <div class="seg-marker"><div class="seg-dot dot-teal"></div>Sync Achieved</div>
+    </div>
+    <div class="revise-section">
+      <button class="btn-revise">REVISE THIS SEGMENT</button>
+      <button class="btn-export">EXPORT CLIP</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1280">
+<title>RhythmXR — Sync Achieved</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Encode+Sans+Semi+Expanded:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{width:1280px;min-height:900px;background:#060b12;font-family:'Encode Sans Semi Expanded',sans-serif;color:#fff;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 65% at 50% 50%,rgba(11,113,137,0.25) 0%,transparent 65%),radial-gradient(ellipse 30% 30% at 80% 20%,rgba(93,46,140,0.15) 0%,transparent 50%);pointer-events:none;}
+.top-nav{background:#5D2E8C;display:flex;width:100%;position:relative;z-index:10;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:11px 4px 10px;gap:4px;cursor:pointer;border-right:1px solid rgba(255,255,255,0.1);}
+.nav-item:last-child{border-right:none;}
+.nav-item svg{width:16px;height:16px;fill:rgba(255,255,255,0.8);}
+.nav-label{font-size:9px;letter-spacing:1px;font-weight:600;color:rgba(255,255,255,0.8);}
+.nav-item.active svg{fill:#CCFF66;}
+.nav-item.active .nav-label{color:#CCFF66;}
+.session-bar{background:rgba(11,113,137,0.25);border-bottom:1px solid rgba(11,113,137,0.4);display:flex;align-items:center;justify-content:space-between;padding:8px 24px;}
+.session-left{display:flex;align-items:center;gap:12px;}
+.session-dot{width:8px;height:8px;border-radius:50%;background:#CCFF66;}
+.session-text{font-size:10px;letter-spacing:1px;color:rgba(255,255,255,0.6);}
+.session-title{font-family:'Fredoka',sans-serif;font-size:14px;color:#CCFF66;}
+.main{display:grid;grid-template-columns:140px 1fr 300px;min-height:756px;position:relative;z-index:1;}
+.hud-sidebar{padding:24px 16px;border-right:1px solid rgba(255,255,255,0.07);display:flex;flex-direction:column;gap:14px;}
+.hud-label{font-size:8px;letter-spacing:1.5px;color:rgba(255,255,255,0.35);margin-bottom:3px;}
+.hud-val{font-family:'Fredoka',sans-serif;font-size:22px;font-weight:600;color:#CCFF66;}
+.hud-div{height:1px;background:rgba(255,255,255,0.08);}
+.hud-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:10px;text-align:center;cursor:pointer;}
+.hud-btn svg{width:18px;height:18px;fill:rgba(255,255,255,0.6);display:block;margin:0 auto 4px;}
+.hud-btn span{font-size:8px;letter-spacing:1px;color:rgba(255,255,255,0.5);}
+.canvas-area{display:flex;align-items:center;justify-content:center;}
+.sync-scene{position:relative;width:500px;height:580px;display:flex;align-items:center;justify-content:center;}
+.sync-outer-ring{position:absolute;width:480px;height:480px;border-radius:50%;border:1px solid rgba(11,113,137,0.2);top:50%;left:50%;transform:translate(-50%,-50%);}
+.sync-mid-ring{position:absolute;width:360px;height:360px;border-radius:50%;border:1px solid rgba(11,113,137,0.35);top:50%;left:50%;transform:translate(-50%,-50%);}
+.sync-inner-ring{position:absolute;width:240px;height:240px;border-radius:50%;border:2px solid #0B7189;top:50%;left:50%;transform:translate(-50%,-50%);}
+.sync-core{position:absolute;width:80px;height:80px;border-radius:50%;background:rgba(11,113,137,0.3);border:2px solid #0B7189;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;}
+.sync-core svg{width:32px;height:32px;fill:#CCFF66;}
+.co-presence-badge{position:absolute;top:20px;left:50%;transform:translateX(-50%);background:rgba(204,255,102,0.12);border:1px solid rgba(204,255,102,0.4);border-radius:8px;padding:8px 20px;text-align:center;white-space:nowrap;}
+.co-badge-val{font-family:'Fredoka',sans-serif;font-size:22px;font-weight:600;color:#CCFF66;}
+.co-badge-label{font-size:9px;letter-spacing:1.5px;color:rgba(204,255,102,0.7);margin-top:2px;}
+.sound-viz{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);display:flex;gap:4px;align-items:flex-end;}
+.sound-bar{width:5px;border-radius:3px;background:#0B7189;}
+.tutor-fig{position:absolute;right:60px;top:50%;transform:translateY(-55%);}
+.student-fig{position:absolute;left:60px;top:50%;transform:translateY(-55%);}
+.fig-body{width:50px;height:120px;border-radius:25px 25px 12px 12px;}
+.fig-head{width:20px;height:20px;border-radius:50%;position:absolute;top:-24px;left:50%;transform:translateX(-50%);}
+.fig-tutor .fig-body{background:rgba(93,46,140,0.4);border:1px solid rgba(93,46,140,0.7);}
+.fig-tutor .fig-head{background:rgba(93,46,140,0.5);}
+.fig-student .fig-body{background:rgba(11,113,137,0.4);border:1px solid rgba(11,113,137,0.7);}
+.fig-student .fig-head{background:rgba(11,113,137,0.5);}
+.zen-badge{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);font-size:10px;letter-spacing:1.5px;color:rgba(11,113,137,0.8);}
+.metrics-panel{padding:24px 20px;border-left:1px solid rgba(255,255,255,0.07);display:flex;flex-direction:column;gap:12px;}
+.panel-title{font-size:9px;letter-spacing:1.5px;color:rgba(255,255,255,0.35);margin-bottom:4px;}
+.metric-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:14px;}
+.metric-name{font-size:9px;letter-spacing:1px;color:rgba(255,255,255,0.4);margin-bottom:4px;}
+.metric-val{font-family:'Fredoka',sans-serif;font-size:22px;font-weight:600;}
+.metric-teal{color:#0B7189;}
+.metric-green{color:#CCFF66;}
+.metric-track{height:4px;background:rgba(255,255,255,0.1);border-radius:2px;margin-top:8px;overflow:hidden;}
+.metric-fill{height:100%;border-radius:2px;}
+.fill-100{background:#CCFF66;width:100%;}
+.fill-94{background:#0B7189;width:94%;}
+.metric-sub{font-size:9px;color:rgba(255,255,255,0.4);margin-top:4px;}
+.bottom-hud{position:relative;z-index:1;background:rgba(0,0,0,0.5);border-top:1px solid rgba(255,255,255,0.08);display:flex;}
+.hud-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 8px;gap:4px;cursor:pointer;border-right:1px solid rgba(255,255,255,0.08);}
+.hud-tab:last-child{border-right:none;}
+.hud-tab svg{width:18px;height:18px;fill:rgba(255,255,255,0.5);}
+.hud-tab span{font-size:9px;letter-spacing:1px;color:rgba(255,255,255,0.5);}
+.hud-tab.active svg{fill:#CCFF66;}
+.hud-tab.active span{color:#CCFF66;}
+</style>
+</head>
+<body>
+<nav class="top-nav">
+  <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M3 12L12 3l9 9v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg><span class="nav-label">HOME</span></div>
+  <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20M6 2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2z"/></svg><span class="nav-label">LIBRARY</span></div>
+  <div class="nav-item active"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><span class="nav-label">LEARN</span></div>
+  <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M4 20h4V10H4zM10 20h4V4h-4zM16 20h4v-6h-4z"/></svg><span class="nav-label">STATS</span></div>
+  <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm-7 8a7 7 0 1114 0H5z"/></svg><span class="nav-label">PROFILE</span></div>
+</nav>
+<div class="session-bar">
+  <div class="session-left">
+    <div class="session-dot"></div>
+    <span class="session-text">SESSION ACTIVE</span>
+    <span class="session-title">SYNC ACHIEVED</span>
+  </div>
+  <div style="font-size:10px;color:rgba(204,255,102,0.7);letter-spacing:1px;">ZEN PULSE STEADY</div>
+</div>
+<div class="main">
+  <div class="hud-sidebar">
+    <div><div class="hud-label">CO-PRESENCE</div><div class="hud-val">100%</div></div>
+    <div class="hud-div"></div>
+    <div><div class="hud-label">BPM</div><div class="hud-val">128</div></div>
+    <div class="hud-div"></div>
+    <div><div class="hud-label">HAPTICS</div><div class="hud-val" style="font-size:14px;color:#0B7189;">ACTIVE</div></div>
+    <div class="hud-btn"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8zM6 1v3M10 1v3M14 1v3"/></svg><span>HAPTICS</span></div>
+    <div class="hud-btn"><svg viewBox="0 0 24 24"><path d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>END</span></div>
+  </div>
+  <div class="canvas-area">
+    <div class="sync-scene">
+      <div class="sync-outer-ring"></div>
+      <div class="sync-mid-ring"></div>
+      <div class="sync-inner-ring"></div>
+      <div class="sync-core"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" stroke="#CCFF66" stroke-width="2.5" stroke-linecap="round" fill="none"/></svg></div>
+      <div class="tutor-fig fig-tutor" style="position:absolute;right:80px;top:50%;transform:translateY(-55%);">
+        <div class="fig-head" style="width:20px;height:20px;border-radius:50%;background:rgba(93,46,140,0.5);position:absolute;top:-24px;left:50%;transform:translateX(-50%);"></div>
+        <div style="width:50px;height:120px;border-radius:25px 25px 12px 12px;background:rgba(93,46,140,0.4);border:1px solid rgba(93,46,140,0.7);"></div>
+      </div>
+      <div style="position:absolute;left:80px;top:50%;transform:translateY(-55%);">
+        <div style="width:20px;height:20px;border-radius:50%;background:rgba(11,113,137,0.5);position:absolute;top:-24px;left:50%;transform:translateX(-50%);"></div>
+        <div style="width:50px;height:120px;border-radius:25px 25px 12px 12px;background:rgba(11,113,137,0.4);border:1px solid rgba(11,113,137,0.7);"></div>
+      </div>
+      <div class="co-presence-badge">
+        <div class="co-badge-val">100%</div>
+        <div class="co-badge-label">CO-PRESENCE ACHIEVED</div>
+      </div>
+      <div class="sound-viz">
+        <div class="sound-bar" style="height:8px;"></div>
+        <div class="sound-bar" style="height:16px;"></div>
+        <div class="sound-bar" style="height:24px;"></div>
+        <div class="sound-bar" style="height:32px;"></div>
+        <div class="sound-bar" style="height:48px;background:#CCFF66;"></div>
+        <div class="sound-bar" style="height:32px;"></div>
+        <div class="sound-bar" style="height:24px;"></div>
+        <div class="sound-bar" style="height:16px;"></div>
+        <div class="sound-bar" style="height:8px;"></div>
+      </div>
+      <div class="zen-badge">ZEN PULSE STEADY · NEURAL SYNC OPTIMAL</div>
+    </div>
+  </div>
+  <div class="metrics-panel">
+    <div class="panel-title">LIVE SYNC STATS</div>
+    <div class="metric-card">
+      <div class="metric-name">NEURAL SYNC</div>
+      <div class="metric-val metric-green">100%</div>
+      <div class="metric-track"><div class="metric-fill fill-100"></div></div>
+      <div class="metric-sub">Mirroring precision at peak</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-name">STABILITY</div>
+      <div class="metric-val metric-teal">94%</div>
+      <div class="metric-track"><div class="metric-fill fill-94"></div></div>
+      <div class="metric-sub">Your neural sync with the instructor is optimal</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-name">RHYTHM LOCK</div>
+      <div class="metric-val metric-green" style="font-size:14px;">LOCKED</div>
+      <div class="metric-sub">128 BPM · Perfect tempo</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-name">ZEN PULSE</div>
+      <div class="metric-val" style="color:#7fe0ef;font-size:14px;">STEADY</div>
+      <div class="metric-sub">Flow state achieved</div>
+    </div>
+  </div>
+</div>
+<div class="bottom-hud">
+  <div class="hud-tab active"><svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm-7 8a7 7 0 1114 0H5z"/></svg><span>POSTURE</span></div>
+  <div class="hud-tab"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3"/></svg><span>RHYTHM HAPTICS</span></div>
+  <div class="hud-tab"><svg viewBox="0 0 24 24"><path d="M18.364 5.636l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>END SESSION</span></div>
+</div>
+</body>
+</html>

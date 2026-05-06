@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1280">
+<title>RhythmXR — Sync 100% Complete</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Encode+Sans+Semi+Expanded:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{width:1280px;min-height:900px;background:#040910;font-family:'Encode Sans Semi Expanded',sans-serif;color:#fff;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 60% at 50% 45%,rgba(11,113,137,0.2) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 80% 70%,rgba(204,255,102,0.06) 0%,transparent 55%);pointer-events:none;}
+.top-nav{background:#5D2E8C;display:flex;width:100%;position:relative;z-index:10;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:11px 4px 10px;gap:4px;cursor:pointer;border-right:1px solid rgba(255,255,255,0.1);}
+.nav-item:last-child{border-right:none;}
+.nav-item svg{width:16px;height:16px;fill:rgba(255,255,255,0.8);}
+.nav-label{font-size:9px;letter-spacing:1px;font-weight:600;color:rgba(255,255,255,0.8);}
+.nav-item.active svg{fill:#CCFF66;}
+.nav-item.active .nav-label{color:#CCFF66;}
+.content{display:grid;grid-template-columns:1fr 480px;min-height:820px;position:relative;z-index:1;}
+.center-col{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px;}
+.sync-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(204,255,102,0.12);border:1px solid rgba(204,255,102,0.35);border-radius:8px;padding:8px 20px;margin-bottom:24px;}
+.sync-badge-dot{width:8px;height:8px;border-radius:50%;background:#CCFF66;}
+.sync-badge span{font-size:10px;letter-spacing:1.5px;color:#CCFF66;font-weight:600;}
+.sync-visualizer{position:relative;width:280px;height:280px;margin-bottom:32px;}
+.sv-ring{position:absolute;border-radius:50%;border:1px solid;}
+.sv-r1{inset:0;border-color:rgba(11,113,137,0.2);}
+.sv-r2{inset:16px;border-color:rgba(11,113,137,0.35);}
+.sv-r3{inset:32px;border-color:#0B7189;border-width:2px;}
+.sv-core{position:absolute;inset:48px;border-radius:50%;background:rgba(11,113,137,0.2);border:2px solid #0B7189;display:flex;align-items:center;justify-content:center;}
+.sv-core-inner{display:flex;flex-direction:column;align-items:center;}
+.sv-pct{font-family:'Fredoka',sans-serif;font-size:36px;font-weight:600;color:#CCFF66;}
+.sv-label{font-size:8px;letter-spacing:1.5px;color:rgba(204,255,102,0.7);}
+.floating-badge{position:absolute;top:-8px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:10px;letter-spacing:1px;color:#CCFF66;background:rgba(204,255,102,0.1);border:1px solid rgba(204,255,102,0.3);border-radius:4px;padding:3px 10px;}
+.page-title{font-family:'Fredoka',sans-serif;font-size:32px;font-weight:600;text-align:center;margin-bottom:8px;}
+.page-sub{font-size:12px;color:rgba(255,255,255,0.5);text-align:center;max-width:400px;line-height:1.6;margin-bottom:28px;}
+.action-row{display:flex;gap:12px;}
+.btn-new{background:#5D2E8C;border:none;border-radius:8px;padding:14px 28px;color:#fff;font-family:'Encode Sans Semi Expanded',sans-serif;font-size:11px;letter-spacing:1.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;}
+.btn-new svg{width:14px;height:14px;fill:#CCFF66;}
+.btn-revise{background:transparent;border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:14px 24px;color:rgba(255,255,255,0.6);font-family:'Encode Sans Semi Expanded',sans-serif;font-size:11px;letter-spacing:1px;cursor:pointer;}
+.right-panel{padding:40px 44px;border-left:1px solid rgba(255,255,255,0.07);display:flex;flex-direction:column;justify-content:center;gap:16px;}
+.panel-section-title{font-size:9px;letter-spacing:1.5px;color:rgba(255,255,255,0.35);margin-bottom:4px;}
+.quick-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;}
+.q-stat{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:14px;text-align:center;}
+.q-stat-val{font-family:'Fredoka',sans-serif;font-size:20px;font-weight:600;color:#0B7189;}
+.q-stat-label{font-size:8px;letter-spacing:1px;color:rgba(255,255,255,0.4);margin-top:4px;}
+.aside-card{background:rgba(11,113,137,0.1);border:1px solid rgba(11,113,137,0.25);border-radius:12px;padding:20px;}
+.aside-title{font-family:'Fredoka',sans-serif;font-size:16px;font-weight:600;color:#7fe0ef;margin-bottom:6px;}
+.aside-text{font-size:11px;color:rgba(255,255,255,0.5);line-height:1.6;}
+.sync-lock-row{display:flex;gap:10px;margin-top:12px;}
+.lock-chip{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:6px 12px;font-size:9px;color:rgba(255,255,255,0.6);letter-spacing:0.5px;}
+.session-replay{background:rgba(93,46,140,0.1);border:1px solid rgba(93,46,140,0.25);border-radius:12px;padding:20px;}
+.replay-title{font-family:'Fredoka',sans-serif;font-size:14px;color:#c9a3f0;margin-bottom:8px;}
+.replay-detail-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.06);}
+.replay-detail-row:last-child{border-bottom:none;}
+.rd-label{font-size:10px;color:rgba(255,255,255,0.4);}
+.rd-val{font-size:10px;font-weight:600;color:#fff;}
+</style>
+</head>
+<body>
+<nav class="top-nav">
+  <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M3 12L12 3l9 9v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg><span class="nav-label">HOME</span></div>
+  <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20M6 2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2z"/></svg><span class="nav-label">LIBRARY</span></div>
+  <div class="nav-item active"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><span class="nav-label">LEARN</span></div>
+  <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M4 20h4V10H4zM10 20h4V4h-4zM16 20h4v-6h-4z"/></svg><span class="nav-label">STATS</span></div>
+  <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm-7 8a7 7 0 1114 0H5z"/></svg><span class="nav-label">PROFILE</span></div>
+</nav>
+<div class="content">
+  <div class="center-col">
+    <div class="sync-badge"><div class="sync-badge-dot"></div><span>SYNC: 100% — READY FOR NEW ROUTINE</span></div>
+    <div class="sync-visualizer">
+      <div class="sv-ring sv-r1"></div>
+      <div class="sv-ring sv-r2"></div>
+      <div class="sv-ring sv-r3"></div>
+      <div class="sv-core">
+        <div class="sv-core-inner">
+          <div class="sv-pct">100%</div>
+          <div class="sv-label">SYNC LOCK</div>
+        </div>
+      </div>
+      <div class="floating-badge">RECORDING OFF</div>
+    </div>
+    <div class="page-title">Your spatial position and rhythmic timing are perfectly aligned</div>
+    <p class="page-sub">Your spatial position and rhythmic timing are perfectly aligned with the instructor's movements. Flow state achieved.</p>
+    <div class="action-row">
+      <button class="btn-new"><svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"/></svg>START NEW ROUTINE</button>
+      <button class="btn-revise">REVISE</button>
+    </div>
+  </div>
+  <div class="right-panel">
+    <div>
+      <div class="panel-section-title">SESSION SUMMARY</div>
+      <div class="quick-stats">
+        <div class="q-stat"><div class="q-stat-val">12ms</div><div class="q-stat-label">LATENCY</div></div>
+        <div class="q-stat"><div class="q-stat-val" style="color:#CCFF66;">High</div><div class="q-stat-label">STABILITY</div></div>
+        <div class="q-stat"><div class="q-stat-val">128</div><div class="q-stat-label">BPM</div></div>
+      </div>
+    </div>
+    <div class="aside-card">
+      <div class="aside-title">Neural Sync Achieved</div>
+      <div class="aside-text">Your neural sync with the instructor is optimal. Mirroring precision at peak performance.</div>
+      <div class="sync-lock-row">
+        <div class="lock-chip">BPM 128</div>
+        <div class="lock-chip">HAPTICS ACTIVE</div>
+        <div class="lock-chip">SYNC LOCK</div>
+      </div>
+    </div>
+    <div class="session-replay">
+      <div class="replay-title">Session Replay Available</div>
+      <div class="replay-detail-row"><span class="rd-label">Duration</span><span class="rd-val">00:42:15</span></div>
+      <div class="replay-detail-row"><span class="rd-label">Peak Accuracy</span><span class="rd-val">A+ Flawless</span></div>
+      <div class="replay-detail-row"><span class="rd-label">Co-presence</span><span class="rd-val">100%</span></div>
+      <div class="replay-detail-row"><span class="rd-label">Routine</span><span class="rd-val">Neon Flow IV</span></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

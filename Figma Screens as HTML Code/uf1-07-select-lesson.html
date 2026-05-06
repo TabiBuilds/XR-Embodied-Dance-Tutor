@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1280">
+<title>RhythmXR — Select a Lesson</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Encode+Sans+Semi+Expanded:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{width:1280px;min-height:900px;background:#0d0d1a;font-family:'Encode Sans Semi Expanded',sans-serif;color:#fff;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 50% 50% at 50% 30%,rgba(93,46,140,0.15) 0%,transparent 65%);pointer-events:none;}
+.top-nav{background:#5D2E8C;display:flex;width:100%;position:relative;z-index:10;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:11px 4px 10px;gap:4px;cursor:pointer;border-right:1px solid rgba(255,255,255,0.1);}
+.nav-item:last-child{border-right:none;}
+.nav-item svg{width:16px;height:16px;fill:rgba(255,255,255,0.8);}
+.nav-label{font-size:9px;letter-spacing:1px;font-weight:600;color:rgba(255,255,255,0.8);}
+.nav-item.active svg{fill:#CCFF66;}
+.nav-item.active .nav-label{color:#CCFF66;}
+.content{padding:48px 72px;position:relative;z-index:1;}
+.page-title{font-family:'Fredoka',sans-serif;font-size:48px;font-weight:600;margin-bottom:8px;}
+.page-sub{font-size:12px;color:rgba(255,255,255,0.45);margin-bottom:36px;}
+.lessons-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:32px;}
+.lesson-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:14px;overflow:hidden;cursor:pointer;transition:border-color 0.2s;}
+.lesson-card:hover{border-color:rgba(93,46,140,0.6);}
+.lesson-card.featured{border-color:rgba(93,46,140,0.6);background:rgba(93,46,140,0.1);}
+.lesson-thumb{height:140px;background:rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;position:relative;border-bottom:1px solid rgba(255,255,255,0.08);}
+.thumb-pattern{position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 8px,rgba(93,46,140,0.08) 8px,rgba(93,46,140,0.08) 9px);}
+.thumb-badge{position:absolute;top:12px;left:12px;background:rgba(93,46,140,0.8);border-radius:4px;padding:3px 8px;font-size:9px;letter-spacing:1px;color:rgba(255,255,255,0.8);font-weight:600;}
+.thumb-icon{position:relative;z-index:1;width:40px;height:40px;border-radius:50%;background:rgba(93,46,140,0.4);display:flex;align-items:center;justify-content:center;}
+.thumb-icon svg{width:20px;height:20px;fill:#c9a3f0;}
+.lesson-body{padding:18px;}
+.lesson-name{font-family:'Fredoka',sans-serif;font-size:18px;font-weight:600;margin-bottom:14px;}
+.lesson-meta{display:flex;gap:0;}
+.meta-item{flex:1;text-align:center;border-right:1px solid rgba(255,255,255,0.08);padding:0 8px;}
+.meta-item:last-child{border-right:none;}
+.meta-val{font-family:'Fredoka',sans-serif;font-size:16px;font-weight:600;color:#0B7189;}
+.meta-label{font-size:8px;letter-spacing:1px;color:rgba(255,255,255,0.35);margin-top:2px;}
+.pagination{display:flex;align-items:center;justify-content:flex-end;gap:6px;}
+.page-btn{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka',sans-serif;font-size:14px;cursor:pointer;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.6);}
+.page-btn.active{background:#5D2E8C;border-color:#5D2E8C;color:#fff;}
+</style>
+</head>
+<body>
+<nav class="top-nav">
+  <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M3 12L12 3l9 9v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg><span class="nav-label">HOME</span></div>
+  <div class="nav-item active"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20M6 2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2z"/></svg><span class="nav-label">LIBRARY</span></div>
+  <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><span class="nav-label">LEARN</span></div>
+  <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M4 20h4V10H4zM10 20h4V4h-4zM16 20h4v-6h-4z"/></svg><span class="nav-label">STATS</span></div>
+  <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm-7 8a7 7 0 1114 0H5z"/></svg><span class="nav-label">PROFILE</span></div>
+</nav>
+<div class="content">
+  <div class="page-title">Select a Lesson</div>
+  <div class="page-sub">Choose your next routine — synced to your tutor's current teaching sequence</div>
+  <div class="lessons-grid">
+    <div class="lesson-card featured">
+      <div class="lesson-thumb">
+        <div class="thumb-pattern"></div>
+        <div class="thumb-badge">ADVANCED ROUTINE</div>
+        <div class="thumb-icon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-name">Neon Flow IV</div>
+        <div class="lesson-meta">
+          <div class="meta-item"><div class="meta-val">128</div><div class="meta-label">BPM</div></div>
+          <div class="meta-item"><div class="meta-val">Elite</div><div class="meta-label">DIFFICULTY</div></div>
+          <div class="meta-item"><div class="meta-val">04:20</div><div class="meta-label">DURATION</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="lesson-card">
+      <div class="lesson-thumb">
+        <div class="thumb-pattern"></div>
+        <div class="thumb-badge">ADVANCED ROUTINE</div>
+        <div class="thumb-icon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-name">Neon Flow IV</div>
+        <div class="lesson-meta">
+          <div class="meta-item"><div class="meta-val">128</div><div class="meta-label">BPM</div></div>
+          <div class="meta-item"><div class="meta-val">Elite</div><div class="meta-label">DIFFICULTY</div></div>
+          <div class="meta-item"><div class="meta-val">04:20</div><div class="meta-label">DURATION</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="lesson-card">
+      <div class="lesson-thumb">
+        <div class="thumb-pattern"></div>
+        <div class="thumb-badge">ADVANCED ROUTINE</div>
+        <div class="thumb-icon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-name">Neon Flow IV</div>
+        <div class="lesson-meta">
+          <div class="meta-item"><div class="meta-val">128</div><div class="meta-label">BPM</div></div>
+          <div class="meta-item"><div class="meta-val">Elite</div><div class="meta-label">DIFFICULTY</div></div>
+          <div class="meta-item"><div class="meta-val">04:20</div><div class="meta-label">DURATION</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="lesson-card">
+      <div class="lesson-thumb">
+        <div class="thumb-pattern"></div>
+        <div class="thumb-badge">ADVANCED ROUTINE</div>
+        <div class="thumb-icon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-name">Neon Flow IV</div>
+        <div class="lesson-meta">
+          <div class="meta-item"><div class="meta-val">128</div><div class="meta-label">BPM</div></div>
+          <div class="meta-item"><div class="meta-val">Elite</div><div class="meta-label">DIFFICULTY</div></div>
+          <div class="meta-item"><div class="meta-val">04:20</div><div class="meta-label">DURATION</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="lesson-card">
+      <div class="lesson-thumb">
+        <div class="thumb-pattern"></div>
+        <div class="thumb-badge">ADVANCED ROUTINE</div>
+        <div class="thumb-icon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-name">Neon Flow IV</div>
+        <div class="lesson-meta">
+          <div class="meta-item"><div class="meta-val">128</div><div class="meta-label">BPM</div></div>
+          <div class="meta-item"><div class="meta-val">Elite</div><div class="meta-label">DIFFICULTY</div></div>
+          <div class="meta-item"><div class="meta-val">04:20</div><div class="meta-label">DURATION</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="lesson-card">
+      <div class="lesson-thumb">
+        <div class="thumb-pattern"></div>
+        <div class="thumb-badge">ADVANCED ROUTINE</div>
+        <div class="thumb-icon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-name">Neon Flow IV</div>
+        <div class="lesson-meta">
+          <div class="meta-item"><div class="meta-val">128</div><div class="meta-label">BPM</div></div>
+          <div class="meta-item"><div class="meta-val">Elite</div><div class="meta-label">DIFFICULTY</div></div>
+          <div class="meta-item"><div class="meta-val">04:20</div><div class="meta-label">DURATION</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pagination">
+    <div class="page-btn active">1</div>
+    <div class="page-btn">2</div>
+    <div class="page-btn">3</div>
+    <div class="page-btn">4</div>
+    <div class="page-btn">5</div>
+    <div class="page-btn">6</div>
+  </div>
+</div>
+</body>
+</html>

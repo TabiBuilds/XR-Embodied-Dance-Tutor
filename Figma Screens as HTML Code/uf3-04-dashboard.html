@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1280">
+<title>RhythmXR — Dancer Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Encode+Sans+Semi+Expanded:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{width:1280px;min-height:900px;background:#0d0d1a;font-family:'Encode Sans Semi Expanded',sans-serif;color:#fff;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 50% at 60% 30%,rgba(93,46,140,0.18) 0%,transparent 60%),radial-gradient(ellipse 40% 40% at 15% 70%,rgba(11,113,137,0.13) 0%,transparent 55%);pointer-events:none;}
+.top-nav{background:#5D2E8C;display:flex;width:100%;position:relative;z-index:10;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:11px 4px 10px;gap:4px;cursor:pointer;border-right:1px solid rgba(255,255,255,0.1);}
+.nav-item:last-child{border-right:none;}
+.nav-item svg{width:16px;height:16px;fill:rgba(255,255,255,0.8);}
+.nav-label{font-size:9px;letter-spacing:1px;font-weight:600;color:rgba(255,255,255,0.8);}
+.nav-item.active svg{fill:#CCFF66;}
+.nav-item.active .nav-label{color:#CCFF66;}
+.content{padding:44px 64px;position:relative;z-index:1;}
+.welcome-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:36px;}
+.welcome-left{}
+.welcome-eyebrow{font-size:9px;letter-spacing:2px;color:rgba(255,255,255,0.4);margin-bottom:6px;}
+.welcome-name{font-family:'Fredoka',sans-serif;font-size:40px;font-weight:600;}
+.welcome-name span{color:#CCFF66;}
+.welcome-sub{font-size:12px;color:rgba(255,255,255,0.5);margin-top:6px;}
+.welcome-right{display:flex;gap:10px;}
+.quick-btn{display:flex;align-items:center;gap:8px;background:#5D2E8C;border:none;border-radius:8px;padding:12px 20px;color:#fff;font-family:'Encode Sans Semi Expanded',sans-serif;font-size:11px;letter-spacing:1px;font-weight:600;cursor:pointer;}
+.quick-btn svg{width:14px;height:14px;fill:#CCFF66;}
+.quick-btn-outline{background:transparent;border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:12px 20px;color:rgba(255,255,255,0.6);font-family:'Encode Sans Semi Expanded',sans-serif;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:8px;}
+.quick-btn-outline svg{width:14px;height:14px;fill:rgba(255,255,255,0.5);}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.stat-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:22px;}
+.stat-icon-wrap{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
+.si-purple{background:rgba(93,46,140,0.3);}
+.si-teal{background:rgba(11,113,137,0.25);}
+.si-green{background:rgba(204,255,102,0.12);}
+.si-neutral{background:rgba(255,255,255,0.07);}
+.stat-icon-wrap svg{width:20px;height:20px;}
+.si-purple svg{fill:#c9a3f0;}
+.si-teal svg{fill:#7fe0ef;}
+.si-green svg{fill:#CCFF66;}
+.si-neutral svg{fill:rgba(255,255,255,0.6);}
+.stat-val{font-family:'Fredoka',sans-serif;font-size:32px;font-weight:600;color:#fff;margin-bottom:3px;}
+.stat-label{font-size:9px;letter-spacing:1px;color:rgba(255,255,255,0.4);}
+.stat-change{font-size:10px;color:#CCFF66;margin-top:5px;}
+.bottom-grid{display:grid;grid-template-columns:1fr 1fr 320px;gap:16px;}
+.section-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:24px;}
+.sc-title{font-family:'Fredoka',sans-serif;font-size:18px;font-weight:600;margin-bottom:16px;}
+.activity-row{display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);}
+.activity-row:last-child{border-bottom:none;}
+.activity-icon{width:36px;height:36px;border-radius:9px;background:rgba(93,46,140,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.activity-icon svg{width:16px;height:16px;fill:#c9a3f0;}
+.activity-text{flex:1;}
+.activity-title{font-size:12px;font-weight:600;}
+.activity-meta{font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;}
+.activity-badge{font-size:9px;padding:3px 8px;border-radius:4px;font-weight:600;white-space:nowrap;}
+.badge-a{background:rgba(204,255,102,0.15);color:#CCFF66;border:1px solid rgba(204,255,102,0.3);}
+.badge-b{background:rgba(11,113,137,0.15);color:#7fe0ef;border:1px solid rgba(11,113,137,0.3);}
+.coach-card{background:rgba(11,113,137,0.08);border:1px solid rgba(11,113,137,0.2);border-radius:12px;padding:24px;}
+.coach-header{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.coach-avatar{width:36px;height:36px;border-radius:50%;background:rgba(11,113,137,0.3);display:flex;align-items:center;justify-content:center;}
+.coach-avatar svg{width:18px;height:18px;fill:#7fe0ef;}
+.coach-name{font-size:12px;font-weight:600;}
+.coach-role{font-size:9px;color:rgba(255,255,255,0.4);}
+.insight-text{font-size:12px;color:rgba(255,255,255,0.65);line-height:1.7;margin-bottom:16px;}
+.insight-chips{display:flex;flex-wrap:wrap;gap:8px;}
+.insight-chip{font-size:9px;letter-spacing:0.5px;background:rgba(11,113,137,0.18);border:1px solid rgba(11,113,137,0.3);border-radius:5px;padding:4px 9px;color:#7fe0ef;}
+.goal-card{background:rgba(93,46,140,0.1);border:1px solid rgba(93,46,140,0.25);border-radius:12px;padding:24px;}
+.goal-title{font-family:'Fredoka',sans-serif;font-size:15px;font-weight:600;margin-bottom:4px;}
+.goal-sub{font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:14px;}
+.goal-track{height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden;margin-bottom:8px;}
+.goal-fill{height:100%;background:linear-gradient(90deg,#5D2E8C,#0B7189);border-radius:3px;}
+.goal-stats{display:flex;justify-content:space-between;}
+.gs-item{text-align:center;}
+.gs-val{font-family:'Fredoka',sans-serif;font-size:16px;font-weight:600;color:#0B7189;}
+.gs-label{font-size:8px;letter-spacing:1px;color:rgba(255,255,255,0.35);margin-top:2px;}
+</style>
+</head>
+<body>
+<nav class="top-nav">
+  <div class="nav-item active"><svg viewBox="0 0 24 24"><path d="M3 12L12 3l9 9v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg><span class="nav-label">HOME</span></div>
+  <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20M6 2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2z"/></svg><span class="nav-label">LIBRARY</span></div>
+  <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><span class="nav-label">LEARN</span></div>
+  <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M4 20h4V10H4zM10 20h4V4h-4zM16 20h4v-6h-4z"/></svg><span class="nav-label">STATS</span></div>
+  <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm-7 8a7 7 0 1114 0H5z"/></svg><span class="nav-label">PROFILE</span></div>
+</nav>
+<div class="content">
+  <div class="welcome-header">
+    <div class="welcome-left">
+      <div class="welcome-eyebrow">DANCER HUD</div>
+      <div class="welcome-name">Hi, <span>Amina</span> 👋</div>
+      <div class="welcome-sub">You're on a 7-day streak — your best run yet</div>
+    </div>
+    <div class="welcome-right">
+      <button class="quick-btn"><svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"/></svg>START SESSION</button>
+      <button class="quick-btn-outline"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20M6 2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2z"/></svg>BROWSE LIBRARY</button>
+    </div>
+  </div>
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-icon-wrap si-purple"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+      <div class="stat-val">24</div>
+      <div class="stat-label">TOTAL SESSIONS</div>
+      <div class="stat-change">↑ 4 this month</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon-wrap si-green"><svg viewBox="0 0 24 24"><path d="M12 15a7 7 0 100-14 7 7 0 000 14zM8.21 13.89L7 23l5-3 5 3-1.21-9.12"/></svg></div>
+      <div class="stat-val">12</div>
+      <div class="stat-label">MEDALS EARNED</div>
+      <div class="stat-change">↑ 3 silver, 1 gold</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon-wrap si-teal"><svg viewBox="0 0 24 24"><path d="M4 20h4V10H4zM10 20h4V4h-4zM16 20h4v-6h-4z"/></svg></div>
+      <div class="stat-val">87%</div>
+      <div class="stat-label">AVG ACCURACY</div>
+      <div class="stat-change">↑ +3% vs last month</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon-wrap si-neutral"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3"/></svg></div>
+      <div class="stat-val">7</div>
+      <div class="stat-label">DAY STREAK</div>
+      <div class="stat-change">Personal best!</div>
+    </div>
+  </div>
+  <div class="bottom-grid">
+    <div class="section-card">
+      <div class="sc-title">Recent Activity</div>
+      <div class="activity-row">
+        <div class="activity-icon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+        <div class="activity-text"><div class="activity-title">Urban Flow Masterclass</div><div class="activity-meta">Nov 22 · Sensei Kai · 42 min</div></div>
+        <div class="activity-badge badge-a">A+</div>
+      </div>
+      <div class="activity-row">
+        <div class="activity-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12"/></svg></div>
+        <div class="activity-text"><div class="activity-title">Glitch Hop v3</div><div class="activity-meta">Nov 19 · AI Self-Learn · 35 min</div></div>
+        <div class="activity-badge badge-b">87%</div>
+      </div>
+      <div class="activity-row">
+        <div class="activity-icon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+        <div class="activity-text"><div class="activity-title">Neo-Soul Swing</div><div class="activity-meta">Oct 20 · Sensei Kai · 28 min</div></div>
+        <div class="activity-badge badge-b">75%</div>
+      </div>
+    </div>
+    <div class="coach-card">
+      <div class="coach-header">
+        <div class="coach-avatar"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3"/></svg></div>
+        <div><div class="coach-name">AI Coach Insight</div><div class="coach-role">Based on your last 5 sessions</div></div>
+      </div>
+      <p class="insight-text">Your shoulder alignment has improved significantly. Focus on axis control during fast-tempo sequences to bring your drift below 5%. You're very close on the 140 BPM endurance goal.</p>
+      <div class="insight-chips">
+        <div class="insight-chip">Shoulder Alignment ↑</div>
+        <div class="insight-chip">Axis Drift Focus</div>
+        <div class="insight-chip">140 BPM Endurance</div>
+      </div>
+    </div>
+    <div class="goal-card">
+      <div class="goal-title">Training Goal</div>
+      <div class="goal-sub">Master 95% accuracy in Urban Flow</div>
+      <div class="goal-track"><div class="goal-fill" style="width:87%;"></div></div>
+      <div class="goal-stats">
+        <div class="gs-item"><div class="gs-val">87%</div><div class="gs-label">CURRENT</div></div>
+        <div class="gs-item"><div class="gs-val">95%</div><div class="gs-label">TARGET</div></div>
+        <div class="gs-item"><div class="gs-val">3</div><div class="gs-label">SESSIONS LEFT</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

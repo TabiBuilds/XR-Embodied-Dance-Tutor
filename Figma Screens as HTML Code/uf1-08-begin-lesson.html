@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1280">
+<title>RhythmXR — Begin Lesson</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Encode+Sans+Semi+Expanded:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{width:1280px;min-height:900px;background:#0d0d1a;font-family:'Encode Sans Semi Expanded',sans-serif;color:#fff;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 60% at 50% 45%,rgba(11,113,137,0.2) 0%,transparent 65%),radial-gradient(ellipse 40% 40% at 20% 20%,rgba(93,46,140,0.15) 0%,transparent 55%);pointer-events:none;}
+.top-nav{background:#5D2E8C;display:flex;width:100%;position:relative;z-index:10;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:11px 4px 10px;gap:4px;cursor:pointer;border-right:1px solid rgba(255,255,255,0.1);}
+.nav-item:last-child{border-right:none;}
+.nav-item svg{width:16px;height:16px;fill:rgba(255,255,255,0.8);}
+.nav-label{font-size:9px;letter-spacing:1px;font-weight:600;color:rgba(255,255,255,0.8);}
+.nav-item.active svg{fill:#CCFF66;}
+.nav-item.active .nav-label{color:#CCFF66;}
+.layout{display:grid;grid-template-columns:1fr 440px;min-height:820px;position:relative;z-index:1;}
+.center{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px;}
+.bubble-wrap{position:relative;width:340px;height:340px;margin-bottom:32px;}
+.bubble-outer{position:absolute;inset:0;border-radius:50%;border:1px solid rgba(11,113,137,0.3);}
+.bubble-mid{position:absolute;inset:20px;border-radius:50%;border:1px solid rgba(11,113,137,0.5);}
+.bubble-inner{position:absolute;inset:40px;border-radius:50%;border:2px solid #0B7189;background:rgba(11,113,137,0.07);}
+.dancer-silhouette{position:absolute;top:50%;left:50%;transform:translate(-50%,-55%);width:80px;height:180px;background:rgba(11,113,137,0.25);border-radius:40px 40px 20px 20px;}
+.bubble-label{position:absolute;bottom:-32px;left:50%;transform:translateX(-50%);white-space:nowrap;}
+.meta-label{font-size:10px;letter-spacing:1.5px;color:#7fe0ef;text-align:center;}
+.session-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(204,255,102,0.1);border:1px solid rgba(204,255,102,0.3);border-radius:5px;padding:4px 12px;margin-bottom:12px;font-size:9px;letter-spacing:1.5px;color:#CCFF66;font-weight:600;}
+.session-tag-dot{width:6px;height:6px;border-radius:50%;background:#CCFF66;}
+.page-title{font-family:'Fredoka',sans-serif;font-size:36px;font-weight:600;text-align:center;margin-bottom:6px;}
+.page-sub{font-size:12px;color:rgba(255,255,255,0.45);text-align:center;max-width:340px;line-height:1.6;}
+.right-panel{padding:40px 44px;border-left:1px solid rgba(255,255,255,0.07);display:flex;flex-direction:column;justify-content:center;}
+.module-eyebrow{font-size:9px;letter-spacing:2px;color:rgba(255,255,255,0.4);margin-bottom:6px;}
+.module-title{font-family:'Fredoka',sans-serif;font-size:28px;font-weight:600;margin-bottom:24px;}
+.stat-bento{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;}
+.stat-tile{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:16px;}
+.stat-tile-label{font-size:9px;letter-spacing:1px;color:rgba(255,255,255,0.4);margin-bottom:6px;}
+.stat-tile-val{font-family:'Fredoka',sans-serif;font-size:24px;font-weight:600;color:#0B7189;}
+.stat-tile-sub{font-size:9px;color:rgba(255,255,255,0.4);margin-top:2px;letter-spacing:0.5px;}
+.divider-line{height:1px;background:rgba(255,255,255,0.08);margin-bottom:20px;}
+.action-section{}
+.action-label{font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:14px;}
+.btn-launch{width:100%;background:#5D2E8C;border:none;border-radius:10px;padding:18px;color:#fff;font-family:'Encode Sans Semi Expanded',sans-serif;font-size:12px;letter-spacing:1.5px;font-weight:600;cursor:pointer;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:10px;}
+.btn-launch svg{width:16px;height:16px;fill:#CCFF66;}
+.btn-back{width:100%;background:transparent;border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:14px;color:rgba(255,255,255,0.5);font-family:'Encode Sans Semi Expanded',sans-serif;font-size:11px;letter-spacing:1px;cursor:pointer;}
+.hud-strip{position:relative;z-index:1;background:rgba(11,113,137,0.12);border-top:1px solid rgba(11,113,137,0.2);display:flex;justify-content:center;gap:40px;padding:12px;}
+.hud-item{display:flex;align-items:center;gap:8px;}
+.hud-dot{width:6px;height:6px;border-radius:50%;background:#CCFF66;}
+.hud-text{font-size:10px;color:rgba(255,255,255,0.5);letter-spacing:0.5px;}
+.hud-val{font-size:10px;color:#CCFF66;font-weight:600;margin-left:4px;}
+</style>
+</head>
+<body>
+<nav class="top-nav">
+  <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M3 12L12 3l9 9v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg><span class="nav-label">HOME</span></div>
+  <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20M6 2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2z"/></svg><span class="nav-label">LIBRARY</span></div>
+  <div class="nav-item active"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><span class="nav-label">LEARN</span></div>
+  <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M4 20h4V10H4zM10 20h4V4h-4zM16 20h4v-6h-4z"/></svg><span class="nav-label">STATS</span></div>
+  <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm-7 8a7 7 0 1114 0H5z"/></svg><span class="nav-label">PROFILE</span></div>
+</nav>
+<div class="layout">
+  <div class="center">
+    <div class="session-tag"><div class="session-tag-dot"></div>IN SESSION</div>
+    <div class="bubble-wrap">
+      <div class="bubble-outer"></div>
+      <div class="bubble-mid"></div>
+      <div class="bubble-inner"></div>
+      <div class="dancer-silhouette"></div>
+      <div class="bubble-label"><div class="meta-label">BUBBLE ACTIVE · 2.5M RADIUS</div></div>
+    </div>
+    <div style="margin-top:40px;text-align:center;">
+      <div class="page-title">Tutor Learn</div>
+      <p class="page-sub">Synchronize your neural pathways with high fidelity haptic feedback. Experience the future of spatial dance instruction.</p>
+    </div>
+  </div>
+  <div class="right-panel">
+    <div class="module-eyebrow">HAPTIC FLOW MODULE</div>
+    <div class="module-title">Initialize Flow</div>
+    <div class="stat-bento">
+      <div class="stat-tile">
+        <div class="stat-tile-label">INTENSITY</div>
+        <div class="stat-tile-val">85%</div>
+        <div class="stat-tile-sub">HIGH OUTPUT</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-tile-label">SYNC MODE</div>
+        <div class="stat-tile-val" style="font-size:18px;">ADAPTIVE</div>
+        <div class="stat-tile-sub">READY FOR CONNECTION</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-tile-label">EST. TIME</div>
+        <div class="stat-tile-val">12:40</div>
+        <div class="stat-tile-sub">HIGH INTENSITY</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-tile-label">HAPTIC STRENGTH</div>
+        <div class="stat-tile-val">85%</div>
+        <div class="stat-tile-sub">CALIBRATED</div>
+      </div>
+    </div>
+    <div class="divider-line"></div>
+    <div class="action-section">
+      <div class="action-label">All systems ready. Tutor is connected.</div>
+      <button class="btn-launch">
+        <svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"/></svg>
+        BEGIN SESSION
+      </button>
+      <button class="btn-back">RECONFIGURE SETTINGS</button>
+    </div>
+  </div>
+</div>
+<div class="hud-strip">
+  <div class="hud-item"><div class="hud-dot"></div><span class="hud-text">LATENCY:<span class="hud-val"> 4MS</span></span></div>
+  <div class="hud-item"><div class="hud-dot"></div><span class="hud-text">ACCURACY:<span class="hud-val"> 99.8%</span></span></div>
+  <div class="hud-item"><div class="hud-dot"></div><span class="hud-text">RHYTHM PILOT · ELITE LEVEL</span></div>
+  <div class="hud-item"><div class="hud-dot"></div><span class="hud-text">SESSION TIME:<span class="hud-val"> 00:42:15</span></span></div>
+</div>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1280">
+<title>RhythmXR — Sign Up</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Encode+Sans+Semi+Expanded:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{width:1280px;min-height:900px;background:#0d0d1a;font-family:'Encode Sans Semi Expanded',sans-serif;color:#fff;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 60% at 70% 40%,rgba(93,46,140,0.25) 0%,transparent 65%),radial-gradient(ellipse 50% 50% at 15% 75%,rgba(11,113,137,0.18) 0%,transparent 60%);pointer-events:none;}
+.top-nav{background:#5D2E8C;display:flex;width:100%;position:relative;z-index:10;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:11px 4px 10px;gap:4px;cursor:pointer;border-right:1px solid rgba(255,255,255,0.1);}
+.nav-item:last-child{border-right:none;}
+.nav-item svg{width:16px;height:16px;fill:rgba(255,255,255,0.8);}
+.nav-label{font-size:9px;letter-spacing:1px;font-weight:600;color:rgba(255,255,255,0.8);}
+.nav-item.active svg{fill:#CCFF66;}
+.nav-item.active .nav-label{color:#CCFF66;}
+.content{display:grid;grid-template-columns:1fr 1fr;min-height:820px;position:relative;z-index:1;}
+.left-col{padding:64px 64px;display:flex;flex-direction:column;justify-content:center;}
+.brand-name{font-family:'Fredoka',sans-serif;font-size:72px;font-weight:600;line-height:1;margin-bottom:8px;letter-spacing:2px;}
+.brand-name span{color:#CCFF66;}
+.tagline{font-size:13px;color:rgba(255,255,255,0.55);line-height:1.7;max-width:380px;margin-bottom:40px;}
+.feature-chips{display:flex;gap:12px;}
+.chip{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:14px 18px;text-align:center;}
+.chip-icon{width:22px;height:22px;fill:rgba(255,255,255,0.5);margin:0 auto 6px;display:block;}
+.chip-label{font-size:9px;letter-spacing:1px;color:rgba(255,255,255,0.5);}
+.right-col{padding:48px 64px;display:flex;flex-direction:column;justify-content:center;border-left:1px solid rgba(255,255,255,0.07);}
+.form-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:40px;}
+.form-title{font-family:'Fredoka',sans-serif;font-size:24px;font-weight:600;margin-bottom:4px;}
+.form-subtitle{font-size:11px;color:rgba(255,255,255,0.45);margin-bottom:28px;}
+.field{margin-bottom:16px;}
+.field-label{font-size:9px;letter-spacing:1.5px;color:rgba(255,255,255,0.5);margin-bottom:7px;display:block;}
+.field-wrap{position:relative;}
+.field-wrap svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:16px;height:16px;fill:rgba(255,255,255,0.35);}
+.field input{width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:13px 13px 13px 40px;color:#fff;font-family:'Encode Sans Semi Expanded',sans-serif;font-size:13px;outline:none;}
+.field input::placeholder{color:rgba(255,255,255,0.3);}
+.field input:focus{border-color:rgba(93,46,140,0.8);background:rgba(93,46,140,0.1);}
+.btn-primary{width:100%;background:#5D2E8C;border:none;border-radius:8px;padding:16px;color:#fff;font-family:'Encode Sans Semi Expanded',sans-serif;font-size:12px;letter-spacing:1.5px;font-weight:600;cursor:pointer;margin-top:8px;margin-bottom:20px;display:flex;align-items:center;justify-content:center;gap:10px;}
+.btn-arrow{width:14px;height:14px;fill:#fff;}
+.signin-row{text-align:center;font-size:12px;color:rgba(255,255,255,0.4);}
+.signin-link{color:#CCFF66;cursor:pointer;margin-left:4px;}
+.footer-bar{position:relative;z-index:1;display:flex;justify-content:center;gap:32px;padding:16px;border-top:1px solid rgba(255,255,255,0.07);}
+.footer-item{display:flex;align-items:center;gap:6px;}
+.footer-item svg{width:10px;height:10px;fill:rgba(255,255,255,0.35);}
+.footer-item span{font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:0.5px;}
+</style>
+</head>
+<body>
+<nav class="top-nav">
+  <div class="nav-item">
+    <svg viewBox="0 0 24 24"><path d="M3 12L12 3l9 9v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg>
+    <span class="nav-label">HOME</span>
+  </div>
+  <div class="nav-item">
+    <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20M6 2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2z"/></svg>
+    <span class="nav-label">LIBRARY</span>
+  </div>
+  <div class="nav-item active">
+    <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+    <span class="nav-label">LEARN</span>
+  </div>
+  <div class="nav-item">
+    <svg viewBox="0 0 24 24"><path d="M4 20h4V10H4zM10 20h4V4h-4zM16 20h4v-6h-4z"/></svg>
+    <span class="nav-label">STATS</span>
+  </div>
+  <div class="nav-item">
+    <svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm-7 8a7 7 0 1114 0H5z"/></svg>
+    <span class="nav-label">PROFILE</span>
+  </div>
+</nav>
+
+<div class="content">
+  <div class="left-col">
+    <div class="brand-name">PULSE<br><span>FLOW</span></div>
+    <p class="tagline">Enter the spatial rhythm arena. Calibrate your motion and master the flow in high fidelity augmented reality.</p>
+    <div class="feature-chips">
+      <div class="chip">
+        <svg class="chip-icon" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        <div class="chip-label">FULL MOTION</div>
+      </div>
+      <div class="chip">
+        <svg class="chip-icon" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        <div class="chip-label">LOW LATENCY</div>
+      </div>
+      <div class="chip">
+        <svg class="chip-icon" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13M9 9l12-2M6 15a3 3 0 110 6 3 3 0 010-6zm12-2a3 3 0 110 6 3 3 0 010-6z"/></svg>
+        <div class="chip-label">3D SOUND</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="right-col">
+    <div class="form-card">
+      <div class="form-title">Join the Kinetic Flow</div>
+      <div class="form-subtitle">Initialize your spatial profile to begin your journey</div>
+      <div class="field">
+        <label class="field-label">FULL NAME</label>
+        <div class="field-wrap">
+          <svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm-7 8a7 7 0 1114 0H5z"/></svg>
+          <input type="text" placeholder="Enter your pilot name">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">KINETIC ID (EMAIL)</label>
+        <div class="field-wrap">
+          <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm8 7L4 6h16l-8 5z"/></svg>
+          <input type="email" placeholder="pilot@kinetic.xr">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">SECURITY KEY (PASSWORD)</label>
+        <div class="field-wrap">
+          <svg viewBox="0 0 24 24"><path d="M12 17a2 2 0 100-4 2 2 0 000 4zm6-10a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h1V6a5 5 0 0110 0v1h1z"/></svg>
+          <input type="password" placeholder="••••••••••••">
+        </div>
+      </div>
+      <button class="btn-primary">
+        CREATE ACCOUNT
+        <svg class="btn-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+      </button>
+      <div class="signin-row">Already have an account?<span class="signin-link">Sign In</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="footer-bar">
+  <div class="footer-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg><span>REGION: GLOBAL</span></div>
+  <div class="footer-item"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>SUPPORT</span></div>
+  <div class="footer-item"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>PRIVACY</span></div>
+</div>
+</body>
+</html>

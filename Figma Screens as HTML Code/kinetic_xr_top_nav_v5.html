@@ -1,0 +1,216 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&display=swap');
+
+  .kxr-wrap {
+    width: 100%;
+    min-height: 580px;
+    background: #0a0e14;
+    font-family: 'Fredoka', sans-serif;
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+  }
+
+  .kxr-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 80% 60%, rgba(0,80,60,0.35) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 50% at 20% 80%, rgba(0,40,40,0.4) 0%, transparent 60%),
+      linear-gradient(160deg, #0a0e14 0%, #0d1a16 50%, #0a1210 100%);
+    z-index: 0;
+  }
+
+  .kxr-lines {
+    position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  }
+
+  .kxr-topnav {
+    position: relative;
+    z-index: 10;
+    background: #5D2E8C;
+    display: flex;
+    align-items: stretch;
+    height: 68px;
+  }
+
+  .kxr-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    cursor: pointer;
+    color: #ffffff;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.15s;
+  }
+  .kxr-nav-item:hover { background: rgba(0,0,0,0.12); }
+  .kxr-nav-item.active { background: rgba(0,0,0,0.18); }
+  .kxr-nav-icon { width: 22px; height: 22px; fill: #ffffff; }
+
+  .kxr-content {
+    position: relative;
+    z-index: 5;
+    padding: 36px 32px 32px;
+    font-family: 'Fredoka', sans-serif;
+  }
+
+  .kxr-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #c8f000;
+    margin-bottom: 8px;
+  }
+
+  .kxr-heading {
+    font-size: 42px;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0 0 28px;
+  }
+
+  .kxr-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 20px 22px;
+    margin-bottom: 16px;
+  }
+
+  .kxr-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .kxr-card-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    background: rgba(200,240,0,0.15);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .kxr-card-icon.teal { background: rgba(30,160,120,0.2); }
+
+  .kxr-badge {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    border-radius: 50px;
+    padding: 5px 18px;
+    letter-spacing: 0.01em;
+  }
+  .kxr-badge.live {
+    background: #5D2E8C;
+    color: #ffffff;
+  }
+  .kxr-badge.auto {
+    background: #2A7F8F;
+    color: #ffffff;
+  }
+
+  .kxr-card-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 6px;
+  }
+
+  .kxr-card-desc {
+    font-size: 13px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.5;
+    margin: 0 0 14px;
+  }
+
+  .kxr-cta {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #c8f000;
+    cursor: pointer;
+  }
+</style>
+
+<div class="kxr-wrap">
+  <div class="kxr-bg"></div>
+  <svg class="kxr-lines" viewBox="0 0 880 580" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <line x1="500" y1="80" x2="880" y2="320" stroke="rgba(0,200,120,0.08)" stroke-width="1.5"/>
+    <line x1="520" y1="60" x2="880" y2="360" stroke="rgba(0,200,120,0.06)" stroke-width="1"/>
+    <line x1="560" y1="100" x2="880" y2="280" stroke="rgba(0,200,120,0.05)" stroke-width="1"/>
+    <line x1="480" y1="120" x2="800" y2="460" stroke="rgba(0,200,120,0.07)" stroke-width="1.5"/>
+  </svg>
+
+  <nav class="kxr-topnav">
+    <div class="kxr-nav-item">
+      <svg class="kxr-nav-icon" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      Home
+    </div>
+    <div class="kxr-nav-item">
+      <svg class="kxr-nav-icon" viewBox="0 0 24 24"><path d="M4 4h6v6H4zm0 10h6v6H4zM14 4h6v6h-6zm0 10h6v6h-6z"/></svg>
+      Library
+    </div>
+    <div class="kxr-nav-item active">
+      <svg class="kxr-nav-icon" viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+      Learn
+    </div>
+    <div class="kxr-nav-item">
+      <svg class="kxr-nav-icon" viewBox="0 0 24 24"><path d="M3.5 18.5l4-8 4 3 4-5.5 4 10.5H3.5z"/></svg>
+      Stats
+    </div>
+    <div class="kxr-nav-item">
+      <svg class="kxr-nav-icon" viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+      Profile
+    </div>
+  </nav>
+
+  <div class="kxr-content">
+    <div class="kxr-label">Instruction Mode</div>
+    <div class="kxr-heading">Select Path</div>
+
+    <div class="kxr-card">
+      <div class="kxr-card-header">
+        <div class="kxr-card-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <circle cx="9" cy="7" r="3" fill="#c8f000"/>
+            <path d="M9 11c-3.5 0-5.5 1.5-5.5 2.5V15h11v-1.5C14.5 12.5 12.5 11 9 11z" fill="#c8f000"/>
+            <circle cx="17" cy="7" r="2.5" fill="#c8f000" opacity="0.6"/>
+            <path d="M17 10.5c2.5 0 4 1.2 4 2V15h-5v-1.5c0-.4-.2-.8-.5-1.1.5-.2 1-.4 1.5-.9z" fill="#c8f000" opacity="0.6"/>
+          </svg>
+        </div>
+        <span class="kxr-badge live">Live Session</span>
+      </div>
+      <div class="kxr-card-title">XR with Tutor</div>
+      <div class="kxr-card-desc">Real-time correction from professional dance instructors in a shared spatial environment.</div>
+      <div class="kxr-cta">Connect Now →</div>
+    </div>
+
+    <div class="kxr-card">
+      <div class="kxr-card-header">
+        <div class="kxr-card-icon teal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="3" fill="#1ec07a"/>
+            <circle cx="12" cy="12" r="6" stroke="#1ec07a" stroke-width="1.5" fill="none"/>
+            <line x1="12" y1="4" x2="12" y2="6" stroke="#1ec07a" stroke-width="1.5"/>
+            <line x1="12" y1="18" x2="12" y2="20" stroke="#1ec07a" stroke-width="1.5"/>
+            <line x1="4" y1="12" x2="6" y2="12" stroke="#1ec07a" stroke-width="1.5"/>
+            <line x1="18" y1="12" x2="20" y2="12" stroke="#1ec07a" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <span class="kxr-badge auto">Autonomous</span>
+      </div>
+      <div class="kxr-card-title">AI Self-Learn</div>
+      <div class="kxr-card-desc">Exploratory mode with real-time skeleton tracking and predictive rhythm analysis.</div>
+      <div class="kxr-cta">Begin Exploration ↓</div>
+    </div>
+  </div>
+</div>
