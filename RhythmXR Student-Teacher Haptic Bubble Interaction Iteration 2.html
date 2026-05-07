@@ -1,0 +1,323 @@
+
+<h2 class="sr-only">RhythmXR 3D: Student–teacher haptic bubble — interactive 3D animated walkthrough</h2>
+
+<div style="font-family:var(--font-sans);">
+
+<div style="display:flex;justify-content:space-between;align-items:baseline;padding:0 0 6px;">
+  <span id="r3t" style="font-size:15px;font-weight:500;color:var(--color-text-primary);"></span>
+  <span id="r3n" style="font-size:12px;color:var(--color-text-secondary);white-space:nowrap;padding-left:12px;"></span>
+</div>
+
+<div id="r3box" style="width:100%;aspect-ratio:16/9;overflow:hidden;border-radius:12px;border:0.5px solid var(--color-border-tertiary);background:#06080F;position:relative;">
+  <canvas id="r3c" style="display:block;"></canvas>
+  <div id="r3load" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:rgba(120,160,255,0.5);">Initializing XR space…</div>
+</div>
+
+<div style="display:flex;align-items:center;gap:10px;padding:7px 0 3px;">
+  <div style="flex:1;height:2px;background:var(--color-border-tertiary);border-radius:2px;overflow:hidden;">
+    <div id="r3bar" style="height:100%;background:#185FA5;transition:width 0.5s;width:0%;"></div>
+  </div>
+</div>
+<div id="r3cap" style="font-size:13px;color:var(--color-text-secondary);line-height:1.6;min-height:48px;padding:0 0 8px;"></div>
+
+<div style="display:flex;align-items:center;gap:8px;">
+  <button onclick="rPrev()">← Prev</button>
+  <button id="r3pb" onclick="rTog()">⏸ Pause</button>
+  <button onclick="rNext()">Next →</button>
+  <div style="flex:1;"></div>
+  <div id="r3dots" style="display:flex;gap:6px;align-items:center;"></div>
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const SD=[
+  {title:"Entering the shared bubble",caption:"Teacher and student arrive in separate bubbles. A soft elastic collision merges two personal spaces into one shared presence. The greeting moment — eye contact before the work begins.",camP:[0,2.5,8],look:[0,1.1,0],tx:-0.9,sx:0.9,phase:'merge'},
+  {title:"Teacher demonstrates the move",caption:"The teacher demonstrates from inside the shared space. The student observes from their chosen vantage. The voice channel is always open — they talk as they would in a studio.",camP:[2,2,7],look:[0,1.2,0],tx:-0.9,sx:0.9,phase:'demo'},
+  {title:"Student attempts the move",caption:"The student tries. The posture–rhythm–haptics triad glows softly at the edge of awareness — continuous, ambient, never intrusive. The teacher observes from any angle.",camP:[-2,1.8,7],look:[0,1.1,0],tx:-0.9,sx:0.9,phase:'attempt'},
+  {title:"Haptic correction",caption:"The teacher 'touches' the student's hip. A gentle directional pulse — felt, not seen — says: shift your weight here. Two-way symmetry: either side can invoke this.",camP:[0.5,1.5,6],look:[0.4,1,0],tx:-0.9,sx:0.9,phase:'haptic'},
+  {title:"Stuck? Slow time activated",caption:"\"Can we slow down?\" Tempo drops to 50%. A ghost mirror overlay shows the student their form alongside the teacher's correct shape — no judgment, just information.",camP:[0.8,2.5,7.5],look:[0,1.1,0],tx:-0.9,sx:0.9,phase:'slow'},
+  {title:"Session close",caption:"The teacher signals cool-down. Lighter haptics, slower music. Bubbles part gently. One quiet question: How did that feel? This is the beginning of reflection.",camP:[0,3.5,9],look:[0,1,0],tx:-2.4,sx:2.4,phase:'close'}
+];
+
+// Arm poses [lz,lx,rz,rx]
+const TP=[[.35,0,-.35,0],[.5,-.25,-1.15,.3],[.3,0,-.3,0],[.3,0,-.9,.55],[.55,-.15,-.55,-.15],[.3,0,-1.25,0]];
+const SP=[[.35,0,-.35,0],[.25,0,-.25,0],[-.55,-.45,.85,.4],[.28,0,-.28,0],[.3,.15,-.3,.15],[-1.2,0,.3,0]];
+
+let ren,sc,cam,clk,tFig,sFig,ghostFig,shBubble,tBubble,sBubble;
+let hRings=[],hRingT=0,screens={};
+let rCur=0,rPlay=true,rTmr=null,camT=new THREE.Vector3(),camLook=new THREE.Vector3();
+let mergeT=0;
+
+class Fig3D{
+  constructor(col){
+    const m=new THREE.MeshPhongMaterial({color:col,shininess:40});
+    this.g=new THREE.Group();
+    const add=(geo,px,py,pz)=>{const me=new THREE.Mesh(geo,m);me.position.set(px,py,pz);this.g.add(me);return me;};
+    add(new THREE.CylinderGeometry(.14,.11,.8,10),.0,1.17,.0);
+    add(new THREE.SphereGeometry(.22,16,16),.0,1.82,.0);
+    add(new THREE.SphereGeometry(.09,8,8),.0,1.54,.0);
+    add(new THREE.CylinderGeometry(.15,.12,.28,10),.0,.78,.0);
+    this.lS=new THREE.Group();this.lS.position.set(-.27,1.54,0);this.g.add(this.lS);
+    const lA=new THREE.Mesh(new THREE.CylinderGeometry(.065,.048,.78,8),m);lA.position.y=-.39;this.lS.add(lA);
+    const lH=new THREE.Mesh(new THREE.SphereGeometry(.07,8,8),m);lH.position.y=-.78;this.lS.add(lH);
+    this.rS=new THREE.Group();this.rS.position.set(.27,1.54,0);this.g.add(this.rS);
+    const rA=new THREE.Mesh(new THREE.CylinderGeometry(.065,.048,.78,8),m);rA.position.y=-.39;this.rS.add(rA);
+    const rH=new THREE.Mesh(new THREE.SphereGeometry(.07,8,8),m);rH.position.y=-.78;this.rS.add(rH);
+    this.lHp=new THREE.Group();this.lHp.position.set(-.14,.84,0);this.g.add(this.lHp);
+    const ll=new THREE.Mesh(new THREE.CylinderGeometry(.09,.07,.88,8),m);ll.position.y=-.44;this.lHp.add(ll);
+    const lf=new THREE.Mesh(new THREE.SphereGeometry(.09,8,8),m);lf.position.y=-.88;this.lHp.add(lf);
+    this.rHp=new THREE.Group();this.rHp.position.set(.14,.84,0);this.g.add(this.rHp);
+    const rl=new THREE.Mesh(new THREE.CylinderGeometry(.09,.07,.88,8),m);rl.position.y=-.44;this.rHp.add(rl);
+    const rf=new THREE.Mesh(new THREE.SphereGeometry(.09,8,8),m);rf.position.y=-.88;this.rHp.add(rf);
+    this.mat=m;
+  }
+  lerp(lz,lx,rz,rx,t){
+    this.lS.rotation.z+=(lz-this.lS.rotation.z)*t;
+    this.lS.rotation.x+=(lx-this.lS.rotation.x)*t;
+    this.rS.rotation.z+=(rz-this.rS.rotation.z)*t;
+    this.rS.rotation.x+=(rx-this.rS.rotation.x)*t;
+  }
+}
+
+function makeScreenTex(lines,bc){
+  const c=document.createElement('canvas');c.width=512;c.height=256;
+  const x=c.getContext('2d');
+  x.fillStyle='rgba(4,8,28,.93)';x.fillRect(0,0,512,256);
+  x.strokeStyle=bc;x.lineWidth=4;x.strokeRect(4,4,504,248);
+  x.textAlign='center';
+  lines.forEach(l=>{
+    x.font=(l.w||'400')+' '+(l.s||22)+'px system-ui,sans-serif';
+    x.fillStyle=l.c||'rgba(180,210,255,.9)';
+    x.fillText(l.t,256,l.y);
+  });
+  return new THREE.CanvasTexture(c);
+}
+
+function mkScreen(lines,bc,w,h,pos,rotY){
+  const tex=makeScreenTex(lines,bc);
+  const m=new THREE.Mesh(
+    new THREE.PlaneGeometry(w,h),
+    new THREE.MeshBasicMaterial({map:tex,transparent:true,side:THREE.DoubleSide,depthWrite:false})
+  );
+  m.position.set(...pos);if(rotY)m.rotation.y=rotY;
+  m.visible=false;sc.add(m);return m;
+}
+
+function init3D(){
+  const box=document.getElementById('r3box');
+  const W=box.clientWidth||680,H=Math.round(W*9/16);
+  const canvas=document.getElementById('r3c');
+  ren=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false});
+  ren.setSize(W,H);ren.setClearColor(0x06080F,1);
+  canvas.style.cssText='width:100%;height:100%;display:block;';
+  sc=new THREE.Scene();
+  cam=new THREE.PerspectiveCamera(52,W/H,.1,100);
+  cam.position.set(0,2.5,8);cam.lookAt(0,1.1,0);
+  camT.set(0,2.5,8);camLook.set(0,1.1,0);
+  clk=new THREE.Clock();
+
+  // Lights
+  sc.add(new THREE.AmbientLight(0x223355,.6));
+  const dl=new THREE.DirectionalLight(0xffffff,.9);dl.position.set(3,6,4);sc.add(dl);
+  const pl=new THREE.PointLight(0x2244CC,1.4,10);pl.position.set(0,1.5,0);sc.add(pl);
+  const pl2=new THREE.PointLight(0x331122,.5,8);pl2.position.set(-2,3,2);sc.add(pl2);
+
+  // Shared bubble
+  const bGeo=new THREE.SphereGeometry(2.5,48,48);
+  shBubble=new THREE.Mesh(bGeo,new THREE.MeshPhongMaterial({color:0x2255DD,transparent:true,opacity:.06,side:THREE.BackSide,shininess:120,specular:0x88AAFF}));
+  sc.add(shBubble);
+  const wf=new THREE.Mesh(new THREE.SphereGeometry(2.52,22,22),new THREE.MeshBasicMaterial({color:0x2255CC,wireframe:true,transparent:true,opacity:.07}));
+  sc.add(wf);
+
+  // Individual bubbles for scene 1
+  const mkBub=(col)=>{
+    const b=new THREE.Mesh(new THREE.SphereGeometry(1.5,28,28),new THREE.MeshPhongMaterial({color:col,transparent:true,opacity:.07,side:THREE.BackSide}));
+    const w=new THREE.Mesh(new THREE.SphereGeometry(1.52,16,16),new THREE.MeshBasicMaterial({color:col,wireframe:true,transparent:true,opacity:.1}));
+    const g=new THREE.Group();g.add(b);g.add(w);sc.add(g);return g;
+  };
+  tBubble=mkBub(0x7060CC);tBubble.position.x=-3.5;
+  sBubble=mkBub(0x20AA80);sBubble.position.x=3.5;
+
+  // Figures
+  tFig=new Fig3D(0x9580E0);tFig.g.position.set(-.9,0,0);tFig.g.rotation.y=.4;sc.add(tFig.g);
+  sFig=new Fig3D(0x3DB898);sFig.g.position.set(.9,0,0);sFig.g.rotation.y=-.4;sc.add(sFig.g);
+
+  // Ghost figure (scene 5)
+  ghostFig=new Fig3D(0x9580E0);
+  ghostFig.mat.transparent=true;ghostFig.mat.opacity=.28;ghostFig.mat.wireframe=false;
+  ghostFig.g.position.set(.9,0,.2);ghostFig.g.rotation.y=-.4;ghostFig.g.visible=false;sc.add(ghostFig.g);
+
+  // Haptic rings
+  for(let i=0;i<4;i++){
+    const r=new THREE.Mesh(new THREE.TorusGeometry(.1,.015,8,32),new THREE.MeshBasicMaterial({color:0xDD8800,transparent:true,opacity:.9}));
+    r.rotation.x=Math.PI/2;r.visible=false;sc.add(r);
+    hRings.push(r);
+  }
+
+  // Floating screens
+  screens.voice=mkScreen([
+    {t:'VOICE CHANNEL',s:24,w:'600',c:'rgba(100,200,255,.95)',y:55},
+    {t:'Two-way · continuous · open',s:18,c:'rgba(150,200,255,.7)',y:95},
+    {t:'◉ LIVE',s:16,w:'600',c:'rgba(80,220,120,.9)',y:135}
+  ],'rgba(80,160,255,.6)',2.2,1.1,[2.8,2.4,.5],-.4);
+
+  screens.triad=mkScreen([
+    {t:'POSTURE   RHYTHM   HAPTICS',s:21,w:'600',c:'rgba(180,220,255,.9)',y:60},
+    {t:'● ━━━━━━━━━━━━━● ━━━━━━━━●',s:14,c:'rgba(150,200,255,.6)',y:100},
+    {t:'ambient · continuous · non-intrusive',s:15,c:'rgba(130,180,255,.65)',y:140}
+  ],'rgba(80,140,255,.6)',2.8,1.1,[0,-1.5,2.2],0);
+
+  screens.haptic=mkScreen([
+    {t:'HAPTIC ACTIVE',s:26,w:'700',c:'rgba(255,185,50,.95)',y:58},
+    {t:'contact point: student hip',s:18,c:'rgba(255,200,100,.75)',y:98},
+    {t:'← directional pressure →',s:19,c:'rgba(255,185,50,.8)',y:138},
+    {t:'felt · not seen',s:16,c:'rgba(255,200,150,.6)',y:175}
+  ],'rgba(255,160,30,.7)',2.2,1.3,[2.6,2.1,0],-.5);
+
+  screens.tempo=mkScreen([
+    {t:'SLOW TIME',s:26,w:'700',c:'rgba(255,185,50,.95)',y:58},
+    {t:'50%',s:60,w:'700',c:'rgba(255,200,80,.95)',y:145},
+    {t:'TEMPO',s:18,c:'rgba(255,185,50,.7)',y:190},
+    {t:'ghost mirror active',s:15,c:'rgba(200,180,255,.75)',y:228}
+  ],'rgba(255,160,30,.7)',1.6,1.5,[-3.2,2.4,0],.55);
+
+  screens.checkout=mkScreen([
+    {t:'How did that feel?',s:28,w:'600',c:'rgba(180,220,255,.95)',y:72},
+    {t:'😌  grounded     🌊  flowy     💫  alive',s:22,c:'rgba(255,255,255,.75)',y:128},
+    {t:'tap to capture your word',s:16,c:'rgba(150,190,255,.6)',y:178},
+    {t:'reflection begins',s:15,w:'600',c:'rgba(100,220,160,.8)',y:222}
+  ],'rgba(80,140,255,.6)',2.8,1.4,[0,-.8,2.5],0);
+
+  // Init dots
+  const d=document.getElementById('r3dots');
+  SD.forEach((_,i)=>{
+    const el=document.createElement('div');
+    el.className='r3d';el.style.cssText='width:7px;height:7px;border-radius:50%;cursor:pointer;border:0.5px solid var(--color-border-secondary);transition:background .2s,transform .2s;';
+    el.onclick=()=>{rGo(i);rRst();};d.appendChild(el);
+  });
+
+  document.getElementById('r3load').style.display='none';
+  rGo(0);rRst();
+  animate();
+}
+
+let _t=0;
+function animate(){
+  requestAnimationFrame(animate);
+  const dt=clk.getDelta();_t+=dt;
+  const s=SD[rCur];
+
+  // Camera lerp
+  cam.position.lerp(new THREE.Vector3(...s.camP),.03);
+  const lv=new THREE.Vector3(...s.look);
+  cam.lookAt(cam.position.clone().lerp(lv,.06));
+
+  // Figure position lerp
+  tFig.g.position.x+=(s.tx-tFig.g.position.x)*.04;
+  sFig.g.position.x+=(s.sx-sFig.g.position.x)*.04;
+
+  // Individual bubble positions follow figures in scene 1
+  if(s.phase==='merge'){
+    mergeT=Math.min(1,mergeT+dt*.35);
+    const e=1-Math.pow(1-mergeT,3);
+    tBubble.position.x=THREE.MathUtils.lerp(-3.5,tFig.g.position.x,e);
+    sBubble.position.x=THREE.MathUtils.lerp(3.5,sFig.g.position.x,e);
+    tBubble.visible=true;sBubble.visible=true;
+    shBubble.visible=mergeT>0.65;
+    shBubble.children&&shBubble.parent&&(sc.children.find(c=>c===shBubble));
+  } else {
+    tBubble.visible=false;sBubble.visible=false;
+    shBubble.visible=true;mergeT=0;
+  }
+
+  // Separate bubbles for close scene
+  if(s.phase==='close'){
+    tBubble.visible=true;sBubble.visible=true;
+    tBubble.position.x=tFig.g.position.x;
+    sBubble.position.x=sFig.g.position.x;
+    shBubble.visible=false;
+  }
+
+  // Arm poses
+  const tp=TP[rCur],sp=SP[rCur];
+  let tLz=tp[0],tLx=tp[1],tRz=tp[2],tRx=tp[3];
+  let sLz=sp[0],sLx=sp[1],sRz=sp[2],sRx=sp[3];
+
+  // Scene-specific animation tweaks
+  if(s.phase==='demo'){
+    tRz=TP[1][2]+Math.sin(_t*1.8)*.25;
+    tLz=TP[1][0]+Math.cos(_t*1.4)*.12;
+  }
+  if(s.phase==='attempt'){
+    sLz=SP[2][0]+Math.sin(_t*1.6)*.3;
+    sRz=SP[2][2]+Math.cos(_t*1.6)*.3;
+    sLx=SP[2][1]+Math.sin(_t*2.2)*.15;
+  }
+  if(s.phase==='close'){
+    tRz=-1.25+Math.sin(_t*2)*.18;
+    sLz=-1.2+Math.sin(_t*2.1)*.18;
+  }
+  tFig.lerp(tLz,tLx,tRz,tRx,.06);
+  sFig.lerp(sLz,sLx,sRz,sRx,.06);
+
+  // Ghost student (scene 5)
+  ghostFig.g.visible=(s.phase==='slow');
+  if(s.phase==='slow'){
+    ghostFig.g.position.x=sFig.g.position.x+.08;
+    ghostFig.lerp(TP[4][0],TP[4][1],TP[4][2],TP[4][3],.06);
+  }
+
+  // Haptic rings
+  const hapticOn=(s.phase==='haptic');
+  hRings.forEach((r,i)=>{
+    r.visible=hapticOn;
+    if(hapticOn){
+      const ph=(_t*.8+i*.33)%1;
+      const sc2=ph*3.5;r.scale.set(sc2,sc2,sc2);
+      r.material.opacity=Math.max(0,(1-ph)*.85);
+      r.position.set(sFig.g.position.x+.14,1.05,.0);
+    }
+  });
+
+  // Screens visibility
+  Object.entries(screens).forEach(([k,mesh])=>{
+    const want={voice:s.phase==='demo',triad:s.phase==='attempt',haptic:s.phase==='haptic',tempo:s.phase==='slow',checkout:s.phase==='close'}[k];
+    if(mesh.material.opacity<(want?.1:0)||want){
+      mesh.visible=want||mesh.material.opacity>.01;
+      mesh.material.opacity=THREE.MathUtils.lerp(mesh.material.opacity,want?1:0,.05);
+      if(!want&&mesh.material.opacity<.01)mesh.visible=false;
+    }
+  });
+
+  // Gentle bubble pulse
+  const pulse=1+Math.sin(_t*.6)*.012;
+  shBubble.scale.set(pulse,pulse,pulse);
+
+  ren.render(sc,cam);
+}
+
+function rGo(i){
+  rCur=i;
+  document.getElementById('r3t').textContent=SD[i].title;
+  document.getElementById('r3cap').textContent=SD[i].caption;
+  document.getElementById('r3n').textContent=(i+1)+' / '+SD.length;
+  document.getElementById('r3bar').style.width=((i+1)/SD.length*100)+'%';
+  document.querySelectorAll('.r3d').forEach((d,j)=>{
+    d.style.background=j===i?'#185FA5':'var(--color-border-tertiary)';
+    d.style.transform=j===i?'scale(1.35)':'scale(1)';
+  });
+}
+function rNext(){rGo((rCur+1)%SD.length);rRst();}
+function rPrev(){rGo((rCur-1+SD.length)%SD.length);rRst();}
+function rTog(){
+  rPlay=!rPlay;
+  document.getElementById('r3pb').textContent=rPlay?'⏸ Pause':'▶ Play';
+  rPlay?rRst():clearInterval(rTmr);
+}
+function rRst(){clearInterval(rTmr);rTmr=setInterval(()=>rGo((rCur+1)%SD.length),7000);}
+
+if(typeof THREE!=='undefined'){init3D();}
+else{document.querySelector('script[src*="three"]').addEventListener('load',init3D);}
+</script>

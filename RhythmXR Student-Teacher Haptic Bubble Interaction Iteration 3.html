@@ -1,0 +1,344 @@
+
+<h2 class="sr-only">RhythmXR 3D: Neon holographic student–teacher interaction inside the haptic bubble</h2>
+
+<div style="font-family:var(--font-sans);">
+<div style="display:flex;justify-content:space-between;align-items:baseline;padding:0 0 6px;">
+  <span id="rt" style="font-size:15px;font-weight:500;color:var(--color-text-primary);"></span>
+  <span id="rn" style="font-size:12px;color:var(--color-text-secondary);white-space:nowrap;padding-left:12px;"></span>
+</div>
+<div id="rbox" style="width:100%;aspect-ratio:16/9;border-radius:12px;border:0.5px solid var(--color-border-tertiary);background:#030508;overflow:hidden;position:relative;">
+  <canvas id="rc" style="display:block;width:100%;height:100%;"></canvas>
+  <div id="rld" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:rgba(180,255,80,.4);">Initializing XR space…</div>
+</div>
+<div style="display:flex;align-items:center;gap:10px;padding:7px 0 3px;">
+  <div style="flex:1;height:2px;background:var(--color-border-tertiary);border-radius:2px;overflow:hidden;">
+    <div id="rb" style="height:100%;background:#AAFF33;transition:width .5s;width:0%;"></div>
+  </div>
+</div>
+<div id="rc2" style="font-size:13px;color:var(--color-text-secondary);line-height:1.6;min-height:48px;padding:0 0 8px;"></div>
+<div style="display:flex;align-items:center;gap:8px;">
+  <button onclick="rPrev()">← Prev</button>
+  <button id="rpb" onclick="rTog()">⏸ Pause</button>
+  <button onclick="rNext()">Next →</button>
+  <div style="flex:1;"></div>
+  <div id="rdots" style="display:flex;gap:6px;align-items:center;"></div>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const TC=0xAAFF33,SC=0x00FFCC,AC=0xFFAA22,BC=0x2255EE;
+const TCS='#AAFF33',SCS='#00FFCC',ACS='#FFAA22';
+
+const SD=[
+  {title:"Entering the shared bubble",cap:"Teacher and student arrive in separate bubbles. A soft elastic collision — two personal spaces merge into one shared presence. The greeting moment before the work begins.",cx:0,cy:2.8,cz:8.5,lx:0,ly:1.1,lz:0,tx:-0.9,sx:0.9,ph:'merge'},
+  {title:"Teacher demonstrates the move",cap:"The teacher demonstrates from inside the shared space. The student observes from their chosen vantage. The voice channel is always open — they talk as they would in a studio.",cx:2.2,cy:2,cz:7.5,lx:0,ly:1.2,lz:0,tx:-0.9,sx:0.9,ph:'demo'},
+  {title:"Student attempts the move",cap:"The student tries the move. The posture–rhythm–haptics triad glows at the edge of awareness — continuous, ambient, non-intrusive. The teacher observes from any angle.",cx:-2,cy:1.8,cz:7.5,lx:0,ly:1.1,lz:0,tx:-0.9,sx:0.9,ph:'attempt'},
+  {title:"Haptic correction",cap:"The teacher 'touches' the student's hip. A gentle directional pulse — felt, not seen — says: shift your weight here. Two-way symmetry: either side can invoke this.",cx:0.4,cy:1.5,cz:6,lx:0.4,ly:1,lz:0,tx:-0.9,sx:0.9,ph:'haptic'},
+  {title:"Stuck? Slow time activated",cap:"\"Can we slow down?\" Tempo drops to 50%. A ghost mirror overlay shows the student their form alongside the teacher's correct shape — no judgment, just spatial information.",cx:1,cy:2.5,cz:7.5,lx:0,ly:1.1,lz:0,tx:-0.9,sx:0.9,ph:'slow'},
+  {title:"Session close",cap:"The teacher signals cool-down. Lighter haptics, slower music. Bubbles part gently. One quiet question surfaces: How did that feel? Reflection begins.",cx:0,cy:3.2,cz:9.5,lx:0,ly:1,lz:0,tx:-2.5,sx:2.5,ph:'close'}
+];
+const TP=[[.35,0,-.35,0],[.5,-.3,-1.2,.3],[.3,0,-.35,0],[.3,0,-.95,.55],[.55,-.18,-.55,-.18],[.3,0,-1.3,0]];
+const SP=[[.35,0,-.35,0],[.22,0,-.22,0],[-.6,-.5,.9,.4],[.28,0,-.28,0],[.3,.18,-.3,.18],[-1.25,0,.28,0]];
+
+let ren,sc3,cam3,clk3;
+let tFig,sFig,gFig;
+let shBub,tBub,sBub;
+let hRings=[],screens={};
+let rCur=0,rPlay=true,rTmr=null,_t=0,mergeT=0;
+
+class GlowFig{
+  constructor(col){
+    this.g=new THREE.Group();
+    const cm=new THREE.MeshBasicMaterial({color:col});
+    this.gm=new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:.13,side:THREE.BackSide,depthWrite:false,blending:THREE.AdditiveBlending});
+    const am=new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:.045,depthWrite:false,blending:THREE.AdditiveBlending});
+    this._cm=cm;
+
+    const ap=(par,geo,py)=>{
+      const c=new THREE.Mesh(geo,cm);c.position.y=py;par.add(c);
+      const g=new THREE.Mesh(geo,this.gm);g.position.y=py;g.scale.setScalar(1.72);par.add(g);
+    };
+
+    // Torso
+    ap(this.g,new THREE.CylinderGeometry(.145,.115,.78,10),1.17);
+    // Chest connector
+    ap(this.g,new THREE.SphereGeometry(.095,8,8),1.54);
+    // Head
+    ap(this.g,new THREE.SphereGeometry(.215,16,16),1.82);
+    // Hip
+    ap(this.g,new THREE.CylinderGeometry(.155,.12,.28,10),.78);
+
+    // Ambient body glow sphere
+    const amb=new THREE.Mesh(new THREE.SphereGeometry(1.1,16,16),am);
+    amb.position.y=1;this.g.add(amb);
+
+    // Point light (avatar glow)
+    this.pl=new THREE.PointLight(col,3.2,4.5);
+    this.pl.position.y=1;this.g.add(this.pl);
+
+    // Left shoulder pivot
+    this.lS=new THREE.Group();this.lS.position.set(-.27,1.54,0);this.g.add(this.lS);
+    ap(this.lS,new THREE.CylinderGeometry(.055,.042,.78,8),-.39);
+    ap(this.lS,new THREE.SphereGeometry(.066,8,8),-.78);
+
+    // Right shoulder pivot
+    this.rS=new THREE.Group();this.rS.position.set(.27,1.54,0);this.g.add(this.rS);
+    ap(this.rS,new THREE.CylinderGeometry(.055,.042,.78,8),-.39);
+    ap(this.rS,new THREE.SphereGeometry(.066,8,8),-.78);
+
+    // Left hip pivot
+    this.lH=new THREE.Group();this.lH.position.set(-.14,.84,0);this.g.add(this.lH);
+    ap(this.lH,new THREE.CylinderGeometry(.085,.065,.88,8),-.44);
+    ap(this.lH,new THREE.SphereGeometry(.078,8,8),-.88);
+
+    // Right hip pivot
+    this.rH=new THREE.Group();this.rH.position.set(.14,.84,0);this.g.add(this.rH);
+    ap(this.rH,new THREE.CylinderGeometry(.085,.065,.88,8),-.44);
+    ap(this.rH,new THREE.SphereGeometry(.078,8,8),-.88);
+  }
+  lerp(lz,lx,rz,rx,t){
+    this.lS.rotation.z+=(lz-this.lS.rotation.z)*t;
+    this.lS.rotation.x+=(lx-this.lS.rotation.x)*t;
+    this.rS.rotation.z+=(rz-this.rS.rotation.z)*t;
+    this.rS.rotation.x+=(rx-this.rS.rotation.x)*t;
+  }
+  setOpacity(o){
+    this._cm.opacity=o;
+    this.gm.opacity=o*.13;
+  }
+}
+
+function mkBub(r,col,opacity){
+  const g=new THREE.Group();
+  g.add(new THREE.Mesh(new THREE.SphereGeometry(r,40,40),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:opacity*.7,side:THREE.BackSide,depthWrite:false,blending:THREE.AdditiveBlending})));
+  g.add(new THREE.Mesh(new THREE.SphereGeometry(r*1.01,20,20),new THREE.MeshBasicMaterial({color:col,wireframe:true,transparent:true,opacity:opacity*1.2,depthWrite:false,blending:THREE.AdditiveBlending})));
+  return g;
+}
+
+function mkScreenTex(lines,bCol){
+  const c=document.createElement('canvas');c.width=512;c.height=256;
+  const x=c.getContext('2d');
+  x.fillStyle='rgba(2,5,18,.92)';x.fillRect(0,0,512,256);
+  x.strokeStyle=bCol;x.lineWidth=3;x.strokeRect(3,3,506,250);
+  x.textAlign='center';
+  lines.forEach(l=>{
+    x.font=(l.w||'400')+' '+(l.s||20)+'px system-ui,sans-serif';
+    x.fillStyle=l.c||bCol;
+    x.fillText(l.t,256,l.y);
+  });
+  return new THREE.CanvasTexture(c);
+}
+
+function mkScreen(lines,bCol,w,h,pos,ry){
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:mkScreenTex(lines,bCol),transparent:true,side:THREE.DoubleSide,depthWrite:false}));
+  m.position.set(...pos);if(ry)m.rotation.y=ry;
+  m.visible=false;sc3.add(m);return m;
+}
+
+function init3D(){
+  const box=document.getElementById('rbox');
+  const W=box.clientWidth||680,H=Math.round(W*9/16);
+  const canvas=document.getElementById('rc');
+  ren=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false});
+  ren.setSize(W,H);ren.setClearColor(0x030508,1);
+  canvas.style.cssText='display:block;width:100%;height:100%;';
+  sc3=new THREE.Scene();
+  cam3=new THREE.PerspectiveCamera(54,W/H,.1,100);
+  cam3.position.set(0,2.8,8.5);cam3.lookAt(0,1.1,0);
+  clk3=new THREE.Clock();
+
+  // Very dim ambient
+  sc3.add(new THREE.AmbientLight(0x112233,.25));
+
+  // Holographic grid floor
+  const grid=new THREE.GridHelper(20,24,0x00AAAA,0x003344);
+  const gMats=Array.isArray(grid.material)?grid.material:[grid.material];
+  gMats.forEach(m=>{m.transparent=true;m.opacity=.45;});
+  sc3.add(grid);
+
+  // Grid glow plane
+  const gp=new THREE.Mesh(new THREE.PlaneGeometry(20,20),new THREE.MeshBasicMaterial({color:0x001122,transparent:true,opacity:.7,depthWrite:false}));
+  gp.rotation.x=-Math.PI/2;gp.position.y=-.02;sc3.add(gp);
+
+  // Shared bubble
+  shBub=mkBub(2.55,0x2255FF,.06);sc3.add(shBub);
+  // Inner bubble light
+  const bl=new THREE.PointLight(0x2244CC,.5,5);sc3.add(bl);
+
+  // Individual entry bubbles
+  tBub=mkBub(1.55,TC,.09);tBub.position.x=-3.5;sc3.add(tBub);
+  sBub=mkBub(1.55,SC,.09);sBub.position.x=3.5;sc3.add(sBub);
+
+  // Figures
+  tFig=new GlowFig(TC);tFig.g.position.set(-0.9,0,0);tFig.g.rotation.y=.4;sc3.add(tFig.g);
+  sFig=new GlowFig(SC);sFig.g.position.set(0.9,0,0);sFig.g.rotation.y=-.4;sc3.add(sFig.g);
+
+  // Ghost figure (scene 5 - teacher's correct form overlaid on student)
+  gFig=new GlowFig(TC);
+  gFig.gm.opacity=.06;
+  gFig.g.position.set(0.9,0,.15);gFig.g.rotation.y=-.4;gFig.g.visible=false;
+  gFig.pl.intensity=0;
+  sc3.add(gFig.g);
+
+  // Haptic rings (Torus at student hip)
+  for(let i=0;i<4;i++){
+    const r=new THREE.Mesh(new THREE.TorusGeometry(.12,.014,8,32),new THREE.MeshBasicMaterial({color:AC,transparent:true,opacity:.9,depthWrite:false,blending:THREE.AdditiveBlending}));
+    r.rotation.x=Math.PI*.5;r.visible=false;sc3.add(r);
+    hRings.push(r);
+  }
+
+  // Floating screens
+  screens.voice=mkScreen([
+    {t:'VOICE CHANNEL OPEN',s:26,w:'600',c:TCS,y:62},
+    {t:'two-way · continuous',s:18,c:'rgba(180,255,100,.7)',y:102},
+    {t:'◉  LIVE',s:20,w:'700',c:'rgba(80,255,100,.9)',y:148}
+  ],TCS,2.2,1.1,[2.9,2.3,.4],-.45);
+
+  screens.triad=mkScreen([
+    {t:'POSTURE   RHYTHM   HAPTICS',s:22,w:'700',c:TCS,y:65},
+    {t:'●──────●──────●',s:16,c:'rgba(160,255,80,.6)',y:105},
+    {t:'ambient · non-intrusive · always-on',s:15,c:'rgba(160,255,150,.6)',y:145},
+    {t:'edge of awareness',s:14,c:'rgba(120,200,100,.5)',y:180}
+  ],TCS,3,1.2,[0,-1.6,2.5],0);
+
+  screens.haptic=mkScreen([
+    {t:'HAPTIC ACTIVE',s:28,w:'700',c:ACS,y:62},
+    {t:'contact · student hip',s:18,c:'rgba(255,200,80,.8)',y:106},
+    {t:'← directional pressure →',s:20,c:ACS,y:150},
+    {t:'felt · not seen · two-way',s:14,c:'rgba(255,190,100,.6)',y:188}
+  ],ACS,2.2,1.2,[3,2,.2],-.5);
+
+  screens.tempo=mkScreen([
+    {t:'SLOW  TIME',s:26,w:'700',c:ACS,y:58},
+    {t:'50%',s:72,w:'800',c:ACS,y:155},
+    {t:'TEMPO',s:18,c:'rgba(255,200,80,.7)',y:198},
+    {t:'ghost mirror  ·  active',s:15,c:'rgba(200,180,255,.7)',y:234}
+  ],ACS,1.7,1.5,[-3.1,2.3,.1],.55);
+
+  screens.checkout=mkScreen([
+    {t:'How did that feel?',s:28,w:'600',c:SCS,y:68},
+    {t:'😌  grounded     🌊  flowy     💫  alive',s:22,c:'rgba(255,255,255,.8)',y:120},
+    {t:'voice · tap · gesture',s:16,c:'rgba(100,255,220,.65)',y:165},
+    {t:'reflection begins',s:18,w:'600',c:SCS,y:210}
+  ],SCS,3,1.4,[0,-.6,2.8],0);
+
+  // Build dots
+  const d=document.getElementById('rdots');
+  SD.forEach((_,i)=>{
+    const el=document.createElement('div');
+    el.className='rdot';
+    el.style.cssText='width:7px;height:7px;border-radius:50%;cursor:pointer;border:0.5px solid #AAFF3344;transition:all .2s;';
+    el.onclick=()=>{rGo(i);rRst();};d.appendChild(el);
+  });
+
+  document.getElementById('rld').style.display='none';
+  rGo(0);rRst();
+  animate3D();
+}
+
+function animate3D(){
+  requestAnimationFrame(animate3D);
+  const dt=Math.min(clk3.getDelta(),.05);_t+=dt;
+  const s=SD[rCur];
+
+  // Camera smooth lerp
+  const tp=new THREE.Vector3(s.cx,s.cy,s.cz);
+  cam3.position.lerp(tp,.028);
+  const tl=new THREE.Vector3(s.lx,s.ly,s.lz);
+  cam3.lookAt(cam3.position.clone().lerp(tl,.05));
+
+  // Figure x-position lerp
+  tFig.g.position.x+=(s.tx-tFig.g.position.x)*.042;
+  sFig.g.position.x+=(s.sx-sFig.g.position.x)*.042;
+  gFig.g.position.x=sFig.g.position.x;
+
+  // Individual bubbles (scene merge / close)
+  const isMerge=s.ph==='merge',isClose=s.ph==='close';
+  tBub.visible=isMerge||isClose;
+  sBub.visible=isMerge||isClose;
+  shBub.visible=!isMerge&&!isClose;
+
+  if(isMerge){
+    mergeT=Math.min(1,mergeT+dt*.3);
+    const e=1-Math.pow(1-mergeT,3);
+    tBub.position.x=THREE.MathUtils.lerp(-3.5,tFig.g.position.x,e);
+    sBub.position.x=THREE.MathUtils.lerp(3.5,sFig.g.position.x,e);
+    shBub.visible=mergeT>.6;
+  }else{
+    mergeT=0;
+    if(isClose){
+      tBub.position.x=tFig.g.position.x;
+      sBub.position.x=sFig.g.position.x;
+    }
+  }
+
+  // Arm pose targets
+  const tp2=TP[rCur],sp=SP[rCur];
+  let [tlz,tlx,trz,trx]=tp2,[slz,slx,srz,srx]=sp;
+
+  // Scene-specific live animation
+  if(s.ph==='demo'){trz+=Math.sin(_t*1.9)*.3;tlz+=Math.cos(_t*1.4)*.14;}
+  if(s.ph==='attempt'){slz+=Math.sin(_t*1.7)*.32;srz+=Math.cos(_t*1.7)*.28;slx+=Math.sin(_t*2.3)*.14;}
+  if(s.ph==='close'){trz+=-1.3+Math.sin(_t*2.1)*.2;slz+=Math.sin(_t*2)*.2;}
+
+  // Gentle body sway (rotation.y oscillation)
+  tFig.g.rotation.y=.4+Math.sin(_t*.7)*.06;
+  sFig.g.rotation.y=-.4+Math.sin(_t*.85+1)*.06;
+
+  tFig.lerp(tlz,tlx,trz,trx,.06);
+  sFig.lerp(slz,slx,srz,srx,.06);
+
+  // Ghost student (scene 5)
+  gFig.g.visible=s.ph==='slow';
+  if(s.ph==='slow'){gFig.lerp(TP[4][0],TP[4][1],TP[4][2],TP[4][3],.06);}
+
+  // Haptic rings (scene 3)
+  hRings.forEach((r,i)=>{
+    r.visible=s.ph==='haptic';
+    if(s.ph==='haptic'){
+      const ph=(_t*.9+i*.28)%1;
+      const sc2=ph*4.5;r.scale.set(sc2,sc2,sc2);
+      r.material.opacity=Math.max(0,(1-ph)*.8);
+      r.position.set(sFig.g.position.x+.16,1.1,0);
+    }
+  });
+
+  // Bubble pulse
+  const bp=1+Math.sin(_t*.55)*.011;shBub.scale.set(bp,bp,bp);
+
+  // Screen visibility
+  const show={voice:'demo',triad:'attempt',haptic:'haptic',tempo:'slow',checkout:'close'};
+  Object.entries(screens).forEach(([k,m])=>{
+    const want=show[k]===s.ph;
+    m.material.opacity=THREE.MathUtils.lerp(m.material.opacity,want?1:0,.06);
+    m.visible=m.material.opacity>.01;
+  });
+
+  ren.render(sc3,cam3);
+}
+
+function rGo(i){
+  rCur=i;
+  document.getElementById('rt').textContent=SD[i].title;
+  document.getElementById('rc2').textContent=SD[i].cap;
+  document.getElementById('rn').textContent=(i+1)+' / '+SD.length;
+  document.getElementById('rb').style.width=((i+1)/SD.length*100)+'%';
+  document.querySelectorAll('.rdot').forEach((d,j)=>{
+    d.style.background=j===i?'#AAFF33':'transparent';
+    d.style.transform=j===i?'scale(1.4)':'scale(1)';
+    d.style.border=j===i?'0.5px solid #AAFF33':'0.5px solid #AAFF3344';
+  });
+}
+function rNext(){rGo((rCur+1)%SD.length);rRst();}
+function rPrev(){rGo((rCur-1+SD.length)%SD.length);rRst();}
+function rTog(){
+  rPlay=!rPlay;
+  document.getElementById('rpb').textContent=rPlay?'⏸ Pause':'▶ Play';
+  rPlay?rRst():clearInterval(rTmr);
+}
+function rRst(){clearInterval(rTmr);rTmr=setInterval(()=>rGo((rCur+1)%SD.length),7000);}
+
+if(typeof THREE!=='undefined'){setTimeout(init3D,80);}
+else{document.querySelector('script[src*="three"]').addEventListener('load',()=>setTimeout(init3D,80));}
+</script>
